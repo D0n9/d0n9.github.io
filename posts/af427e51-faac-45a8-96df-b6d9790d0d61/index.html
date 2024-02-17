@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="description" content="前面 Pwnhub.cn 是老司机们经常开车的地方，新司机想学开车就更得多多关注了(/捂脸逃)。
+戳这里关注官微：胖哈勃
+因为是内测，司机要取得&quot;通行证&quot;(邀请码)才能上路，那么作为公开赛，其实就是拿 Flag 换邀请码啦。
+两个方向，Web 和 binary，作为一只🐶，不要挣扎就选 Web 吧。
+（了解到 Web 题是长亭 CSO 人称 V总的 Valo 在一次实战中遇到的， binary 题则是今年1024 GeekPwn 上破解 PS4 主力进攻选手所出）
+过程 线上比赛地址：http://54.223.145.113:88/
+做题没截图，大家意会好了。
+看到是一个上传页面，难道要考上传拿 Shell ？诶？上传的文件内容会回显到页面中，会不会是 system(cat) 的，拼接一下命令，哦不是。可能是file_get_contents() 读取的，会不会有 SSRF，先看看可以控制的两个位置，文件名和文件内容，拼接一下文件名，后缀得是 txt 结尾，domain.com/1.txt绕过就好，但是 cloudeye 并没有反应。虽然文件内容会原样显示到页面，能造成 XSS 漏洞，但也只是 Self-XSS ，貌似没什么卵用。
+陷入僵局，那试一下会不会有源代码泄露啥的，毕竟也是 CTF 常见套路，.bak、.swp、.php~、.svn、.git 等都试了一遍无果，扫目录吧😭，啪啪啪，一通扫发现 /upload/ 是HTTP 403，证明目录存在呀，也难怪，本身就是上传文件嘛，诶，目录如果403的话，那里面的文件不会也403吧，尝试访问一下**/1**，是 HTTP 404，那就知道了 Apache Directory 设置的是 var/www/html/upload 但知道这点也没有用呐，甚至还不知道 Flag 在哪。
+* 先放一放，接着搬砖
+然后晚上回家看到官微放出 hint ，还叫自行寻找，躲猫猫什么的最喜欢了😳，右键查看源代码，html注释中有 upload.php 关键代码。
+&lt;!-- @move_uploaded_file($_FILES[&#39;file&#39;][&#39;tmp_name&#39;], $dir.$name); echo &#34;上传成功！\n\n文件内容：\n\n&#34;; echo file_get_contents($dir.">  
+
+  <title>
+    
+      Pwnhub 公开赛 Web writeup
+    
+  </title>
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/" />
+  
+  
+  
+  <link rel="stylesheet" href="/css/main.ff8eca9b0b00b45c48fc313f83495c86625933a46ab3079657980ca3c3a790edad11e6944fd08e43ee7b8f0f64d2d1d790a902ce62faa195d7133bc6598665b0.css" integrity="sha512-/47KmwsAtFxI/DE/g0lchmJZM6RqsweWV5gMo8OnkO2tEeaUT9COQ&#43;57jw9k0tHXkKkCzmL6oZXXEzvGWYZlsA==" />
+  
+</head>
+<body a="auto">
+        <main class="page-content" aria-label="Content">
+            <div class="w">
+<a href="/">..</a>
+
+
+<article>
+    <p class="post-meta">
+        <time datetime="2016-12-08 00:00:00 &#43;0000 UTC">
+            2016-12-08
+        </time>
+    </p>
+
+    <h1>Pwnhub 公开赛 Web writeup</h1>
+
+    
+
+    <h2 id="前面">前面</h2>
+<p><a href="http://Pwnhub.cn">Pwnhub.cn</a> 是老司机们经常开车的地方，新司机想学开车就更得多多关注了(/捂脸逃)。</p>
+<p>戳这里关注官微：<a href="http://weibo.com/6064280443">胖哈勃</a></p>
+<p>因为是内测，司机要取得&quot;通行证&quot;(邀请码)才能上路，那么作为公开赛，其实就是拿 Flag 换邀请码啦。</p>
+<p>两个方向，Web 和 binary，作为一只🐶，不要挣扎就选 Web 吧。</p>
+<p>（了解到 Web 题是长亭 CSO 人称 V总的 Valo 在一次实战中遇到的， binary 题则是今年1024 GeekPwn 上破解 PS4 主力进攻选手所出）</p>
+<h2 id="过程">过程</h2>
+<p>线上比赛地址：<a href="http://54.223.145.113:88/">http://54.223.145.113:88/</a></p>
+<p>做题没截图，大家意会好了。</p>
+<p>看到是一个上传页面，难道要考上传拿 Shell ？诶？上传的文件内容会回显到页面中，会不会是 <strong>system(cat)</strong> 的，拼接一下命令，哦不是。可能是<strong>file_get_contents()</strong> 读取的，会不会有 SSRF，先看看可以控制的两个位置，文件名和文件内容，拼接一下文件名，后缀得是 <strong>txt 结尾</strong>，domain.com/1.txt绕过就好，但是 cloudeye 并没有反应。虽然文件内容会原样显示到页面，能造成 XSS 漏洞，但也只是 Self-XSS ，貌似没什么卵用。</p>
+<p>陷入僵局，那试一下会不会有源代码泄露啥的，毕竟也是 CTF 常见套路，<strong>.bak</strong>、<strong>.swp</strong>、<strong>.php~</strong>、<strong>.svn</strong>、<strong>.git</strong> 等都试了一遍无果，扫目录吧😭，啪啪啪，一通扫发现 <strong>/upload/</strong> 是HTTP 403，证明目录存在呀，也难怪，本身就是上传文件嘛，诶，目录如果403的话，那里面的文件不会也403吧，尝试访问一下**/1**，是 HTTP 404，那就知道了 Apache Directory 设置的是 <strong>var/www/html/upload</strong> 但知道这点也没有用呐，甚至还不知道 Flag 在哪。</p>
+<p>* 先放一放，接着搬砖</p>
+<p>然后晚上回家看到官微放出 <strong>hint</strong> ，还叫自行寻找，躲猫猫什么的最喜欢了😳，右键查看源代码，html注释中有 <strong>upload.php</strong> 关键代码。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#f92672">&lt;!--</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">@</span><span style="color:#a6e22e">move_uploaded_file</span>($_FILES[<span style="color:#e6db74">&#39;file&#39;</span>][<span style="color:#e6db74">&#39;tmp_name&#39;</span>], $dir<span style="color:#f92672">.</span>$name);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">echo</span> <span style="color:#e6db74">&#34;上传成功！</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">文件内容：</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">echo</span> <span style="color:#a6e22e">file_get_contents</span>($dir<span style="color:#f92672">.</span>$name);
+</span></span><span style="display:flex;"><span>$files <span style="color:#f92672">=</span> <span style="color:#a6e22e">glob</span>($dir <span style="color:#f92672">.</span> <span style="color:#e6db74">&#39;*&#39;</span>); 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">@</span><span style="color:#a6e22e">unlink</span>($files[<span style="color:#ae81ff">0</span>]);
+</span></span><span style="display:flex;"><span><span style="color:#f92672">--!&gt;</span>
+</span></span></code></pre></div><p>第一行移动上传的文件，第二行无视掉，第三行果然是使用file_get_contents，不过前面有加路径。</p>
+<p>关键是在第四行和第五行，glob 函数把 <strong>$dir</strong> 下的所有文件名匹配成数组赋值给 <strong>$files</strong> ,然后使用 unlink 删除掉排在最前面的那个文件。</p>
+<p>翻一下PHP手册 知道 glob 函数默认是会自动进行排序的，也就是说（话说 Linux 也会自动排序吧）</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171711786.jpg" alt=""></p>
+<p>这样每次删除的就是排在最前面的文件，也就是说是可以删除不属于自己上传的文件的，但知道这个还是没继续的思路，既然是放出关键代码，问题肯定是出在这几行代码中的，可是 flag 在哪呢。</p>
+<p>然后看到官微又放 hint
+<code>Flag是个文件，不需要shell，并且听说放文件的人拥有服务器最高权限</code>
+soga，flag 是用 root 创建的，Apache 是 www-data 没权限对 flag 进行删除操作，那么如果 flag 就藏在upload 目录下，利用 glob 函数自动排序，学校老师就讲过文件排序方式。</p>
+<pre tabindex="0"><code>(0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz)
+# ls
+ 111 19882 abc2321312312 b12345 c1222 ctf.php
+</code></pre><p>可以逐步上传比 flag 文件名更名称靠后的文件，因为 <strong>unlink($files[0]);</strong> 删除排在第一位的文件，而且知道 flag 是 root 创建，Apache 删除不掉，比如一开始上传一个文件名为 S 没有被删除，那么就知道 S 排在了 flag 后面，进而知道 flag 开头是 R。
+脚本代码可以参考紫霞仙子在先知社区发的 <a href="https://xianzhi.aliyun.com/forum/read/516.html">https://xianzhi.aliyun.com/forum/read/516.html</a></p>
+<h2 id="最后">最后</h2>
+<p>这种 CTF 游戏很好呀，就像以前乌云做的三个白帽社区，在挑战中学习分享新姿势。放现在众多CTF 比赛中简直是一股清流。</p>
+<p>长亭牛逼</p>
+
+</article>
+
+            </div>
+        </main>
+    </body></html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="description" content="Ruby 是一种面向对象、命令式、函数式、动态的通用编程语言。在20世纪90年代中期由日本计算机科学家松本行弘（Matz）设计并开发。 - Ruby - 维基百科，自由的百科全书
+编程语言里出现rce漏洞真的太少见了，CVE-2017-17405 是Ruby中Net::FTP 使用open() 并且localfile可控所导致的rce
+Ruby 在 GitHub 中到项目在14号提交了fix Fix a command injection vulnerability in Net::FTP. · ruby/ruby@6d3f72e，可以看到几处原本使用open()现在改为了File.open()，之前没有接触过Ruby，奇怪为什么open()竟有执行命令的能力？
+怀着这种问题打算找Ruby文档看看open()到底是什么鬼？然后我找到了这个 Module: Kernel (Ruby 2.3.0) 详细介绍了CVE-2017-17405的成因，其实很简单，open()可以作为打开文件使用，但是，敲黑板! 在文件名可控到时候则不安全，因为如果文件名以&rsquo;|&lsquo;开头时，其后的字符串会被当作命令来执行，而且文件名为&quot;|-&ldquo;的话，open将生成Ruby的子进程，并返回与子进程之间的管道(pipe)(IO对象)。(此时的运作与IO.popen相同。）
+简直可怕，这个&quot;特性&quot;简直是Python程序员写Ruby时最最需要注意的地方之一呀。（perl也有这样的“特性”）
+本地试试&quot;威力&rdquo;
+可能有人会说，&ldquo;这也是正常功能呀，官方文档也有提及，自己不仔细看文档怪谁&rdquo;
+的确，编程语言可以说时开发者不仔细看文档，开发者说文档内容太多大部分程序员都是当作字典用到到时候查一查，那总得有人为漏洞买单吧。
+lib/net/ftp.rb，官方也是使用了错误了函数，可见官方开发者也没有仔细看文档呀，233
+ref: https://www.ruby-lang.org/en/news/2017/12/14/net-ftp-command-injection-cve-2017-17405/ http://ruby-doc.org/core-2.3.0/Kernel.html#method-i-open">  
+
+  <title>
+    
+      CVE-2017-17405 Ruby Command injection
+    
+  </title>
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/" />
+  
+  
+  
+  <link rel="stylesheet" href="/css/main.ff8eca9b0b00b45c48fc313f83495c86625933a46ab3079657980ca3c3a790edad11e6944fd08e43ee7b8f0f64d2d1d790a902ce62faa195d7133bc6598665b0.css" integrity="sha512-/47KmwsAtFxI/DE/g0lchmJZM6RqsweWV5gMo8OnkO2tEeaUT9COQ&#43;57jw9k0tHXkKkCzmL6oZXXEzvGWYZlsA==" />
+  
+</head>
+<body a="auto">
+        <main class="page-content" aria-label="Content">
+            <div class="w">
+<a href="/">..</a>
+
+
+<article>
+    <p class="post-meta">
+        <time datetime="2017-12-16 00:00:00 &#43;0000 UTC">
+            2017-12-16
+        </time>
+    </p>
+
+    <h1>CVE-2017-17405 Ruby Command injection</h1>
+
+    
+
+    <blockquote>
+<p>Ruby 是一种面向对象、命令式、函数式、动态的通用编程语言。在20世纪90年代中期由日本计算机科学家松本行弘（Matz）设计并开发。 -  <a href="https://zh.wikipedia.org/wiki/Ruby">Ruby - 维基百科，自由的百科全书</a></p>
+</blockquote>
+<p>编程语言里出现rce漏洞真的太少见了，CVE-2017-17405 是Ruby中Net::FTP 使用open() 并且localfile可控所导致的rce</p>
+<p>Ruby 在 GitHub 中到项目在14号提交了fix <a href="https://github.com/ruby/ruby/commit/6d3f72e5be2312be312f2acbf3465b05293c1431">Fix a command injection vulnerability in Net::FTP. · ruby/ruby@6d3f72e</a>，可以看到几处原本使用open()现在改为了File.open()，之前没有接触过Ruby，奇怪为什么open()竟有执行命令的能力？</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171657810.jpg" alt=""></p>
+<p>怀着这种问题打算找Ruby文档看看open()到底是什么鬼？然后我找到了这个 <a href="http://ruby-doc.org/core-2.3.0/Kernel.html#method-i-open">Module: Kernel (Ruby 2.3.0) </a></p>
+<p>详细介绍了CVE-2017-17405的成因，其实很简单，open()可以作为打开文件使用，但是，敲黑板! <strong>在文件名可控到时候则不安全，因为如果文件名以&rsquo;|&lsquo;开头时，其后的字符串会被当作命令来执行，而且文件名为&quot;|-&ldquo;的话，open将生成Ruby的子进程，并返回与子进程之间的管道(pipe)(IO对象)。(此时的运作与IO.popen相同。）</strong></p>
+<p>简直可怕，这个&quot;特性&quot;简直是Python程序员写Ruby时最最需要注意的地方之一呀。（perl也有这样的“特性”）</p>
+<p>本地试试&quot;威力&rdquo;</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171657428.jpg" alt=""></p>
+<p>可能有人会说，&ldquo;这也是正常功能呀，官方文档也有提及，自己不仔细看文档怪谁&rdquo;</p>
+<p>的确，编程语言可以说时开发者不仔细看文档，开发者说文档内容太多大部分程序员都是当作字典用到到时候查一查，那总得有人为漏洞买单吧。</p>
+<p>lib/net/ftp.rb，官方也是使用了错误了函数，可见官方开发者也没有仔细看文档呀，233</p>
+<p>ref:
+<a href="https://www.ruby-lang.org/en/news/2017/12/14/net-ftp-command-injection-cve-2017-17405/">https://www.ruby-lang.org/en/news/2017/12/14/net-ftp-command-injection-cve-2017-17405/</a>
+<a href="http://ruby-doc.org/core-2.3.0/Kernel.html#method-i-open">http://ruby-doc.org/core-2.3.0/Kernel.html#method-i-open</a></p>
+
+</article>
+
+            </div>
+        </main>
+    </body></html>

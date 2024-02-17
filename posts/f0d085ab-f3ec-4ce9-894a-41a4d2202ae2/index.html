@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="description" content="背景 该漏洞由 CyberArk Labs 实验室 Nethanel Coppenhagen 发现 （https://www.cyberark.com/threat-research-blog/execute-this-i-know-you-have-it/），原文介绍该漏洞可能会导致远程代码执行，这是相当严重的问题，因为我们知道可以执行代码往往意味着也可以执行操作系统命令，既远程命令执行，不过深入了解后发现如果要达到远程命令执行其实十分困难，对目标环境有较为苛刻的要求。【且听我娓娓道来】
+影响范围 kibana version &lt; 6.4.3 kibana version &lt; 5.6.13
+可能是因为kibana大版本升级会有兼容性问题，企业内kibana几乎都是集群搭的，所以kibana 很贴心对于 5.x 版本也提供了修复补丁，很赞
+漏洞成因 对于漏洞成因网上已经有分析或者翻译文章，这里只简单说一下
+如下图， require 函数接收一个变量 name ，和 ./ 进行拼接，并且没有任何检查，require() 函数支持使用 ../ 的方式完成跳目录 （ http://nodejs.cn/api/modules.html#modules_require ）所以LFI利用便呼之欲出。
+然后如下图，在api类里 line:60 ~ 66 是 asJson 函数
+然后如下图，line: 22 AND 42，实例导出api类，提供了可控的漏洞触发点
+漏洞复现 搭环境，docker 一把梭
+docker pull sebp/elk:642 存在漏洞的url，参数是 apis ，用 ../ 实现跳目录读取，因为读到 /etc/passwd ，nodejs 会抛出异常（因为不是正常的js文件嘛）不过还是证明是存在漏洞的，但是无法将读到的文件回显出来
+如果有办法向kibana 服务器上传一个 js 文件，使 nodejs 读取执行，就可以rce了，但是很遗憾，nodejs 并不像 php 那样灵活，nodejs 对于 require() 的文件内容有格式要求，所以像php那些类似 lfi 姿势都无法使用。">  
+
+  <title>
+    
+      kibana console api LFI (CVE-2018-17246)
+    
+  </title>
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/" />
+  
+  
+  
+  <link rel="stylesheet" href="/css/main.ff8eca9b0b00b45c48fc313f83495c86625933a46ab3079657980ca3c3a790edad11e6944fd08e43ee7b8f0f64d2d1d790a902ce62faa195d7133bc6598665b0.css" integrity="sha512-/47KmwsAtFxI/DE/g0lchmJZM6RqsweWV5gMo8OnkO2tEeaUT9COQ&#43;57jw9k0tHXkKkCzmL6oZXXEzvGWYZlsA==" />
+  
+</head>
+<body a="auto">
+        <main class="page-content" aria-label="Content">
+            <div class="w">
+<a href="/">..</a>
+
+
+<article>
+    <p class="post-meta">
+        <time datetime="2018-12-21 00:00:00 &#43;0000 UTC">
+            2018-12-21
+        </time>
+    </p>
+
+    <h1>kibana console api LFI (CVE-2018-17246)</h1>
+
+    
+
+    <h2 id="背景">背景</h2>
+<p>该漏洞由 CyberArk Labs 实验室 Nethanel Coppenhagen 发现 （https://www.cyberark.com/threat-research-blog/execute-this-i-know-you-have-it/），原文介绍该漏洞可能会导致远程代码执行，这是相当严重的问题，因为我们知道可以执行代码往往意味着也可以执行操作系统命令，既远程命令执行，不过深入了解后发现如果要达到远程命令执行其实十分困难，对目标环境有较为苛刻的要求。【且听我娓娓道来】</p>
+<h2 id="影响范围">影响范围</h2>
+<p>kibana version &lt; 6.4.3
+kibana version &lt; 5.6.13</p>
+<p>可能是因为kibana大版本升级会有兼容性问题，企业内kibana几乎都是集群搭的，所以kibana 很贴心对于 5.x 版本也提供了修复补丁，很赞</p>
+<h2 id="漏洞成因">漏洞成因</h2>
+<p>对于漏洞成因网上已经有分析或者翻译文章，这里只简单说一下</p>
+<p>如下图， require 函数接收一个变量 name ，和 <strong>./</strong> 进行拼接，并且没有任何检查，require() 函数支持使用 <strong>../</strong> 的方式完成跳目录 （ <a href="http://nodejs.cn/api/modules.html#modules_require">http://nodejs.cn/api/modules.html#modules_require</a> ）所以LFI利用便呼之欲出。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171703924.jpg" alt=""></p>
+<p>然后如下图，在api类里 line:60 ~ 66 是 asJson 函数</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171703430.jpg" alt=""></p>
+<p>然后如下图，line: 22 AND 42，实例导出api类，提供了可控的漏洞触发点</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171704700.jpg" alt=""></p>
+<h2 id="漏洞复现">漏洞复现</h2>
+<p>搭环境，docker 一把梭</p>
+<pre tabindex="0"><code>docker pull sebp/elk:642
+</code></pre><p>存在漏洞的url，参数是 apis ，用 ../ 实现跳目录读取，因为读到 /etc/passwd ，nodejs 会抛出异常（因为不是正常的js文件嘛）不过还是证明是存在漏洞的，但是无法将读到的文件回显出来</p>
+<p>如果有办法向kibana 服务器上传一个 js 文件，使 nodejs 读取执行，就可以rce了，但是很遗憾，nodejs 并不像 php 那样灵活，nodejs 对于 require() 的文件内容有格式要求，所以像php那些类似 lfi 姿势都无法使用。</p>
+<blockquote>
+<p>http://127.0.0.1:32770/api/console/api_server?sense_version=%40%40SENSE_VERSION&amp;apis=es_6_0</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171704969.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171704735.jpg" alt=""></p>
+<h2 id="扫描检测">扫描检测</h2>
+<p>服务指纹，指纹方面大版本之间会有很大差异，下面两种方法比较通用。</p>
+<p>response Header</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171704840.jpg" alt=""></p>
+<p>request Header</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171704297.jpg" alt=""></p>
+<p>验证方法：</p>
+<ol>
+<li>方法一，对比request Header中的版本</li>
+<li>方法二，先请求 【http://127.0.0.1:32770/api/console/api_server?sense_version=%40%40SENSE_VERSION&amp;apis=es_6_0】是否会返回json，如果会则发出 payload ，返回包可能会超时也可能会返回http500，基本可以确定存在漏洞，如果返回包是空json，大概率是不存在漏洞的。</li>
+</ol>
+<h2 id="修复建议">修复建议</h2>
+<ol>
+<li>ACL，设置访问来源白名单</li>
+<li>升级到新版本</li>
+<li>禁用Kibana Console插件， kibana.yml &gt; console.enabled：false</li>
+<li>登录鉴权，https://www.elastic.co/guide/en/x-pack/6.0/xpack-security.html</li>
+</ol>
+
+</article>
+
+            </div>
+        </main>
+    </body></html>

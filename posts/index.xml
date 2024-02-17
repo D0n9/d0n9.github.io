@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title># alert`D0n9` ｜ 输攻墨守</title>
-    <link>http://d0n9.github.io/</link>
-    <description>Recent content on # alert`D0n9` ｜ 输攻墨守</description>
+    <title>Posts on # alert`D0n9` ｜ 输攻墨守</title>
+    <link>http://d0n9.github.io/posts/</link>
+    <description>Recent content in Posts on # alert`D0n9` ｜ 输攻墨守</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 25 Aug 2022 21:30:04 +0800</lastBuildDate>
-    <atom:link href="http://d0n9.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 05 Oct 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://d0n9.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>📌 [招聘]-安全工程师 (基础建设&amp;攻防方向)</title>
       <link>http://d0n9.github.io/posts/79d11423-9314-4c85-b9c0-382f0bfb6c8b/</link>
@@ -333,22 +333,6 @@ vul=;$(printf &amp;#34;\145\143\150\157\40\42\74\77\160\150\160\40\100\145\166\1
 叶湘伦来到路小雨家里。
 这里用了不显眼的镜头，出现了一个中年女人。
 这个看似一闪而过的镜头很重要，在这里的铺垫是很难发觉的，哪怕再回过头看几遍也很可能看不到她。</description>
-    </item>
-    <item>
-      <title>About Me</title>
-      <link>http://d0n9.github.io/about-me/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://d0n9.github.io/about-me/</guid>
-      <description>📚 关于Blog 使用 hugo 搭建在 Github Paegs，theme 基于 hugo-theme-nostyleplease 修改
-如非特别注明，本 blog 文章均为原创，原创文章采用 CC-BY-SA 4.0 协议，转载请注明出处
-如任何文章有错误内容，请联系指出，不胜感激
-👤 关于我 📝 个人简介 2019年加入 Keep 公司担任安全技术负责人，负责公司安全能力建设，安全运营，安全攻防，安全应急响应等工作;
-工作机会请联系 WeChat
-💻 工作经历 2019年，Keep 安全
-2016年，security.immomo.com 陌陌安全团队
-2016年，ce.wooyun.org 乌云众测团队
-🏆 Bounty Hunter 2017年奇虎360安全应急响应中心十万奖励获得者 2017年奇虎360安全应急响应中心年度排行第二名 2015年独立发现支付宝严重漏洞连续两次荣登阿里500万安全赏金计划得主名单 📞 联系我 WeChat: click me
-Email: wyd0n9[at]gmail[dot]com</description>
     </item>
   </channel>
 </rss>

