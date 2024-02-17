@@ -1,0 +1,3 @@
+[submodule "images"]
+	path = images
+	url = https://github.com/D0n9/static-repo.git
