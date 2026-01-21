@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>CVE-2017-14322 登录认证绕过分析 &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>CVE-2017-14322 登录认证绕过分析</h1>
+    <div class="title-header-date">
+        <time>Saturday, May 5, 2018</time>
+    </div>
+    
+  </header>
+  <blockquote>
+<p>首先这并不是一篇翻译文章，是看了原文之后我对这个漏洞的一点分析和理解。</p>
+</blockquote>
+<p><a href="https://security.infoteam.ch/en/blog/posts/narrative-of-an-incident-response-from-compromise-to-the-publication-of-the-weakness.html">https://security.infoteam.ch/en/blog/posts/narrative-of-an-incident-response-from-compromise-to-the-publication-of-the-weakness.html</a></p>
+<p>Interspire Email Marketer 是一款商业软件，在6.1.0之后的版本由于错误使用逻辑运算符和忽视弱类型特点产生了安全问题，并在6.1.6做了修复，但中间竟然相隔了5年之久，最坑的是好像更新版本还需要支付额外的费用～</p>
+<p>作者是在对客户进行应急响应时发现了这个0day，其应急过程和思路很值得学习和思考。</p>
+<p>先是客户发现某个账户发邮件异常，作者通过排查Web日志定位问题，注意到蓝色框是referer字段，表示这条访问记录是从Google过来的，非常像是 Google Hacking 手法，这个IP使用GET访问了管理后台页面大小是5197，紧接着又一个GET访问这时响应变成了302并且页面大小变成了33478，这表明已经登录成功进入后台了，非常奇怪，因为并没有通过表单验证帐密，仅使用两个GET是不足以完成正常的登录认证流程。</p>
+<p>这时应急就要考虑可能是身份凭证泄漏或者认证绕过等漏洞，因为种种迹象表明肯定和cookie有关系，但是使用Google Hacking这种撒网式攻击并不符合XSS之类的攻击流程，虽然我也去看了一下cookie也没有加HttpOnly。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/05/202402171652896.jpg" alt=""></p>
+<p>既然判断前者可能性较低那就着重排查一下是不是有认证绕过之类的漏洞吧</p>
+<p>作者也是很有经验，首先就去看了处理cookie认证那部分代码，有幸我在网上找到了6.1.2版本的源代码，可以一窥究竟。</p>
+<p>在./admin/com/init.php:484~509行，这是出现漏洞的代码，有两个问题</p>
+<ul>
+<li>1、使用 == 进行判断，会受PHP弱类型特性影响，进行强转</li>
+<li>2、整套源码中多处使用 ! 写法，猜测这里开发者可能错误理解了 ! 的作用，原意可能是对比 $tempUser-&gt;settings[&lsquo;LoginCheck&rsquo;] == $tempCookie[&lsquo;rand&rsquo;] ，如果相等则为真，然后用 ! 取反，这样就不会进入到这个 if 判断里，但是用法错误，因为 ! 的优先级比 == 要高</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="nv">$tempCookie</span> <span class="o">=</span> <span class="nx">IEM</span><span class="o">::</span><span class="na">requestGetCookie</span><span class="p">(</span><span class="s1">&#39;IEM_CookieLogin&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl"><span class="nx">···</span> <span class="nx">略</span> <span class="nx">···</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$tempUser</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">User_API</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$tempUser</span><span class="o">-&gt;</span><span class="na">Load</span><span class="p">(</span><span class="nx">intval</span><span class="p">(</span><span class="nv">$tempCookie</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl"><span class="nx">···</span> <span class="nx">略</span> <span class="nx">···</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$tempUser</span><span class="o">-&gt;</span><span class="na">settings</span><span class="p">[</span><span class="s1">&#39;LoginCheck&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="nv">$tempCookie</span><span class="p">[</span><span class="s1">&#39;rand&#39;</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>下面这个测试就是很好的证明</p>
+<p>首先 &lsquo;1&rsquo; === 1，必然是False，因为类型不同
+然后 !&lsquo;1&rsquo;===1，结果也是False，可见并不是先进行'1&rsquo;===1的判断再取反</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/05/202402171653613.jpg" alt=""></p>
+<p>先看一下 $tempCookie 来源是 IEM::requestGetCookie(&lsquo;IEM_CookieLogin&rsquo;, array())</p>
+<p>requestGetCookie函数在./admin/com/lib/IEM.class.php:242~249行，是 IEM_CookieLogin base64解码后在反序列化</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="k">public</span> <span class="k">static</span> <span class="k">function</span> <span class="nf">requestGetCookie</span><span class="p">(</span><span class="nv">$cookieName</span><span class="p">,</span> <span class="nv">$devaultValue</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nv">$callback</span> <span class="o">=</span> <span class="k">null</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$value</span> <span class="o">=</span> <span class="nv">$devaultValue</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nx">isset</span><span class="p">(</span><span class="nv">$_COOKIE</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">array_key_exists</span><span class="p">(</span><span class="nv">$cookieName</span><span class="p">,</span> <span class="nv">$_COOKIE</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$value</span> <span class="o">=</span> <span class="o">@</span><span class="nx">unserialize</span><span class="p">(</span><span class="nx">base64_decode</span><span class="p">(</span><span class="nv">$_COOKIE</span><span class="p">[</span><span class="nv">$cookieName</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="nx">self</span><span class="o">::</span><span class="na">_requestProcess</span><span class="p">(</span><span class="nv">$value</span><span class="p">,</span> <span class="nv">$callback</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>在./admin/functions/login.php:200~207行，调用requestSetCookie()设置两个cookie</p>
+<p>$_COOKIE[&lsquo;IEM_CookieLogin&rsquo;]的值是 usercookie_info 传参到 requestSetCookie 函数进行序列化然后base64编码。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="c1"># ./admin/com/lib/IEM.class.php:250~261 行
+</span></span></span><span class="line"><span class="cl"><span class="k">public</span> <span class="k">static</span> <span class="k">function</span> <span class="nf">requestSetCookie</span><span class="p">(</span><span class="nv">$cookieName</span><span class="p">,</span> <span class="nv">$cookieValue</span><span class="p">,</span> <span class="nv">$expiry</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$value</span> <span class="o">=</span> <span class="o">@</span><span class="nx">serialize</span><span class="p">(</span><span class="nv">$cookieValue</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nv">$value</span> <span class="o">===</span> <span class="k">false</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$expiry</span> <span class="o">=</span> <span class="nx">intval</span><span class="p">(</span><span class="nx">abs</span><span class="p">(</span><span class="nv">$expiry</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nv">$expiry</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$expiry</span> <span class="o">+=</span> <span class="nx">time</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="o">@</span><span class="nx">setcookie</span><span class="p">(</span><span class="nv">$cookieName</span><span class="p">,</span> <span class="nx">base64_encode</span><span class="p">(</span><span class="nv">$value</span><span class="p">),</span> <span class="nv">$expiry</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># ./admin/functions/login.php:200~207 行
+</span></span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="nv">$rememberdetails</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$user</span><span class="p">)</span> <span class="p">{</span> <span class="nv">$user</span> <span class="o">=</span> <span class="nx">IEM</span><span class="o">::</span><span class="na">userGetCurrent</span><span class="p">();</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$rand_check</span><span class="p">)</span> <span class="p">{</span> <span class="nv">$rand_check</span> <span class="o">=</span> <span class="nx">uniqid</span><span class="p">(</span><span class="k">true</span><span class="p">);</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$usercookie_info</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;user&#39;</span> <span class="o">=&gt;</span> <span class="nv">$user</span><span class="o">-&gt;</span><span class="na">userid</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span> <span class="o">=&gt;</span> <span class="nx">time</span><span class="p">(),</span> <span class="s1">&#39;rand&#39;</span> <span class="o">=&gt;</span> <span class="nv">$rand_check</span><span class="p">,</span> <span class="s1">&#39;takemeto&#39;</span> <span class="o">=&gt;</span> <span class="nv">$redirect</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">IEM</span><span class="o">::</span><span class="na">requestSetCookie</span><span class="p">(</span><span class="s1">&#39;IEM_CookieLogin&#39;</span><span class="p">,</span> <span class="nv">$usercookie_info</span><span class="p">,</span> <span class="nv">$oneyear</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$usercookie_info</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span><span class="s1">&#39;takemeto&#39;</span> <span class="o">=&gt;</span> <span class="nv">$redirect</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">IEM</span><span class="o">::</span><span class="na">requestSetCookie</span><span class="p">(</span><span class="s1">&#39;IEM_LoginPreference&#39;</span><span class="p">,</span> <span class="nv">$usercookie_info</span><span class="p">,</span> <span class="nv">$oneyear</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>既然知道了cookie的算法，我们就可以控制 IEM_CookieLogin 的值</p>
+<p>再来看一下 $tempUser-&gt;settings[&lsquo;LoginCheck&rsquo;] 是从哪里过来的，跟进 Load 函数，发现是从数据库里取出的数据</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="c1"># ./admin/com/init.php:497 行
+</span></span></span><span class="line"><span class="cl"><span class="nv">$tempUser</span><span class="o">-&gt;</span><span class="na">Load</span><span class="p">(</span><span class="nx">intval</span><span class="p">(</span><span class="nv">$tempCookie</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># ./admin/functions/api/user.php:541~657 行
+</span></span></span><span class="line"><span class="cl"><span class="k">function</span> <span class="nf">Load</span><span class="p">(</span><span class="nv">$userid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nv">$load_permissions</span><span class="o">=</span><span class="k">true</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$userid</span> <span class="o">=</span> <span class="nx">intval</span><span class="p">(</span><span class="nv">$userid</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nv">$userid</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nv">$query</span> <span class="o">=</span> <span class="s2">&#34;SELECT * FROM [|PREFIX|]users WHERE userid=</span><span class="si">{</span><span class="nv">$userid</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="nv">$result</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">Db</span><span class="o">-&gt;</span><span class="na">Query</span><span class="p">(</span><span class="nv">$query</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$result</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="k">false</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nx">···</span> <span class="nx">略</span> <span class="nx">···</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nv">$user</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">settings</span> <span class="o">=</span> <span class="nx">unserialize</span><span class="p">(</span><span class="nv">$user</span><span class="p">[</span><span class="s1">&#39;settings&#39;</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="nx">is_null</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">segmentadmintype</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">segmentadmintype</span> <span class="o">=</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">AdminType</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="k">true</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/05/202402171653198.jpg" alt=""></p>
+<p>还记得这些代码吗?</p>
+<p>$tempUser-&gt;settings[&lsquo;LoginCheck&rsquo;] 值为 15aee9a0b0cd9b ，取反后为 False，然后$tempCookie是IEM_CookieLogin经过base64_decode后反序列化，得到是一个数组，取出数组中的rand做对比</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="nv">$tempCookie</span> <span class="o">=</span> <span class="nx">IEM</span><span class="o">::</span><span class="na">requestGetCookie</span><span class="p">(</span><span class="s1">&#39;IEM_CookieLogin&#39;</span><span class="p">,</span> <span class="k">array</span><span class="p">());</span>
+</span></span><span class="line"><span class="cl"><span class="nx">···</span> <span class="nx">略</span> <span class="nx">···</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$tempUser</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">User_API</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$tempUser</span><span class="o">-&gt;</span><span class="na">Load</span><span class="p">(</span><span class="nx">intval</span><span class="p">(</span><span class="nv">$tempCookie</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]));</span>
+</span></span><span class="line"><span class="cl"><span class="nx">···</span> <span class="nx">略</span> <span class="nx">···</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$tempUser</span><span class="o">-&gt;</span><span class="na">settings</span><span class="p">[</span><span class="s1">&#39;LoginCheck&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="nv">$tempCookie</span><span class="p">[</span><span class="s1">&#39;rand&#39;</span><span class="p">])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>所以只要设置$tempCookie[&lsquo;rand&rsquo;]值是 True 就可以了，利用PHP弱类型的特点，$tempCookie[&lsquo;rand&rsquo;] 可以是任何值，当然不能为空或者0</p>
+<p>Payload:</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/05/202402171653453.jpg" alt=""></p>
+<p>原作者则是利用序列化可以设置key数据类型，将rand设置一个布尔型，这样即使用 === 全等也可以绕过</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/05/202402171653643.jpg" alt=""></p>
+<p>新版是怎么修复的呢？拿到 6.1.6 的代码 diff 一下，哈哈，这样判断应该就万无一失了，除非 $tempUser-&gt;settings[&lsquo;LoginCheck&rsquo;] 能返回假，但是在 ./admin/com/init.php 也做了判断应该绕不过了。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/05/202402171654266.jpg" alt=""></p>
+<p>ref：
+<a href="https://github.com/joesmithjaffa/CVE-2017-14322">https://github.com/joesmithjaffa/CVE-2017-14322</a>
+<a href="http://php.net/manual/zh/language.operators.precedence.php">http://php.net/manual/zh/language.operators.precedence.php</a>
+<a href="https://blog.csdn.net/iamduoluo/article/details/8491746">https://blog.csdn.net/iamduoluo/article/details/8491746</a></p>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90">技术分析</a>
+    
+      <a href="/tags/cve">CVE</a>
+    
+      <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90">漏洞分析</a>
+    
+      <a href="/tags/web%E5%AE%89%E5%85%A8">Web安全</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

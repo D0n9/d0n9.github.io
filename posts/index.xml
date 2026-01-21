@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on # alert`D0n9` ｜ 输攻墨守</title>
+    <link>http://localhost:1313/posts/</link>
+    <description>Recent content in Posts on # alert`D0n9` ｜ 输攻墨守</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 12 Jan 2026 18:55:08 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>📌 [招聘]-安全工程师 (基础建设&amp;攻防方向)</title>
+      <link>http://localhost:1313/posts/79d11423-9314-4c85-b9c0-382f0bfb6c8b/</link>
+      <pubDate>Tue, 05 Oct 2021 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/79d11423-9314-4c85-b9c0-382f0bfb6c8b/</guid>
+      <description>&lt;p&gt;🔴 职位关闭&lt;/p&gt;&#xA;&lt;p&gt;Keep安全招聘，📮 简历投递 wyd0n9[at]gmail[dot]com&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;h1 id=&#34;安全工程师基础建设攻防方向&#34;&gt;安全工程师（基础建设/攻防方向）&lt;/h1&gt;&#xA;&lt;h2 id=&#34;职位描述&#34;&gt;职位描述&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;负责安全规范制定、安全评估、安全方案设计、代码审计、安全测试、漏洞应急响应等工作。具体工作方向包括Web应用安全、客户端安全、主机系统安全、网络安全、攻击检测与防御、红蓝演练等&lt;/li&gt;&#xA;&lt;li&gt;负责企业内安全设备的运维，包括安全策略管理、系统维护、优化以及安全事件响应&lt;/li&gt;&#xA;&lt;li&gt;参与公司基础网络安全架构的建设，根据业务需求制定安全解决方案&lt;/li&gt;&#xA;&lt;li&gt;负责SDL安全开发生命周期建设，提升公司应用安全建设能力&lt;/li&gt;&#xA;&lt;li&gt;解决日常安全问题，在出现网络攻击或安全事件时进行紧急响应、恢复系统及调查取证&lt;/li&gt;&#xA;&lt;li&gt;参与安全项目实施和管理&lt;/li&gt;&#xA;&lt;li&gt;负责安全攻防新技术研究和业界趋势跟进&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;h2 id=&#34;岗位要求&#34;&gt;岗位要求&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;5年以上安全体系建立、安全攻防渗透等相关工作，本科以上，计算机相关专业。&lt;/li&gt;&#xA;&lt;li&gt;熟悉Web安全，了解SQL注入，命令注入，反序列化等漏洞原理和利用方式，能对Java项目进行白盒代码审计，有独立挖掘过或分析过CVE经验者优先&lt;/li&gt;&#xA;&lt;li&gt;在Web应用安全、移动APP安全、主机系统安全、网络安全、攻击检测与防御至少一方面有较深入的研究和实践&lt;/li&gt;&#xA;&lt;li&gt;熟悉web应用与业务的漏洞挖掘，渗透测试，代码审计及安全解决方案&lt;/li&gt;&#xA;&lt;li&gt;有良好的计算机相关技术基础知识，对网络、操作系统有较深的了解&lt;/li&gt;&#xA;&lt;li&gt;为人正直，具备良好的问题分析与解决能力，有责任心，具有良好的沟通、协调组织能力；&lt;/li&gt;&#xA;&lt;/ol&gt;</description>
+    </item>
+    <item>
+      <title>CVE-2026-22777 ComfyUI Manager 从 Config CRLF Injection 到 RCE</title>
+      <link>http://localhost:1313/posts/563dbc2c-20be-43ba-9a5b-ea911ed5ed3d/</link>
+      <pubDate>Mon, 12 Jan 2026 18:55:08 +0800</pubDate>
+      <guid>http://localhost:1313/posts/563dbc2c-20be-43ba-9a5b-ea911ed5ed3d/</guid>
+      <description>&lt;p&gt;我在研究复现 CVE-2025-67303 ComfyUI-Manager RCE （ &amp;lt; 3.38） 时发现了 RCE 3.38 版本的办法(实际可利用范围 &amp;lt; 3.39.2, 4.0.0 - 4.0.4)，和 swing 一起研究确认这个属于 0day 漏洞， 考虑到 ComfyUI-Manager 已经默认集成在高版本 ComfyUI，所以这个漏洞也可以说是 ComfyUI 的问题&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/Comfy-Org/ComfyUI-Manager/security/advisories/GHSA-562r-8445-54r2&#34;&gt;https://github.com/Comfy-Org/ComfyUI-Manager/security/advisories/GHSA-562r-8445-54r2&lt;/a&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;comfyui-安全机制&#34;&gt;ComfyUI 安全机制&lt;/h1&gt;&#xA;&lt;p&gt;ComfyUI 其中一个重要的安全机制是：通过配置文件（config.ini）中的 security_level 参数进行控制，不同安全等级对应不同的功能限制和适用场景。主要分为这四个等级：strong、normal、normal-、weak，我们只需要弄明白 normal 和 weak 的区别即可。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>kibana console api LFI (CVE-2018-17246)</title>
+      <link>http://localhost:1313/posts/f0d085ab-f3ec-4ce9-894a-41a4d2202ae2/</link>
+      <pubDate>Fri, 21 Dec 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/f0d085ab-f3ec-4ce9-894a-41a4d2202ae2/</guid>
+      <description>&lt;h2 id=&#34;背景&#34;&gt;背景&lt;/h2&gt;&#xA;&lt;p&gt;该漏洞由 CyberArk Labs 实验室 Nethanel Coppenhagen 发现 （https://www.cyberark.com/threat-research-blog/execute-this-i-know-you-have-it/），原文介绍该漏洞可能会导致远程代码执行，这是相当严重的问题，因为我们知道可以执行代码往往意味着也可以执行操作系统命令，既远程命令执行，不过深入了解后发现如果要达到远程命令执行其实十分困难，对目标环境有较为苛刻的要求。【且听我娓娓道来】&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>ImageMagick 漏洞凑热闹手札</title>
+      <link>http://localhost:1313/posts/151a91bd-622f-4041-bf82-419d72cbab52/</link>
+      <pubDate>Wed, 22 Aug 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/151a91bd-622f-4041-bf82-419d72cbab52/</guid>
+      <description>&lt;p&gt;今天日常刷 twitter 看到 Tavis 点赞了这条推&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171659325.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;经历过2016年魔图漏洞洗礼的人看到 ImageMagick 就很敏感，fu*k 这是又报漏洞了，ImageMagick 运用很广泛，赶紧应急一波。&lt;/p&gt;&#xA;&lt;p&gt;不过比较坑的是就没有其他信息，受影响的主机受影响版本啥都没有，甚至组件官方也没有发布安全公告&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>[摘文]·徐阶觉醒 知行合一</title>
+      <link>http://localhost:1313/posts/7b245f8a-a7af-4b41-9d35-afa137303fa7/</link>
+      <pubDate>Sat, 30 Jun 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/7b245f8a-a7af-4b41-9d35-afa137303fa7/</guid>
+      <description>&lt;h3 id=&#34;摘自-明朝那些事儿第七章-徐阶的觉醒&#34;&gt;摘自 《明朝那些事儿》第七章 徐阶的觉醒&lt;/h3&gt;&#xA;&lt;hr&gt;&#xA;&lt;p&gt;事情是这样的，延平一带虽然穷，却还有个天然优势——产矿。&lt;/p&gt;&#xA;&lt;p&gt;这矿出产的东西也比较特别——银。&lt;/p&gt;&#xA;&lt;p&gt;当年那个时候，银矿的地位大致相当于今天的印钞厂，只要能挖出来，就能用出去，还不用担心通货膨胀问题。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CVE-2017-14322 登录认证绕过分析</title>
+      <link>http://localhost:1313/posts/c3270e50-c3d4-4773-b4e1-40d94f134235/</link>
+      <pubDate>Sat, 05 May 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/c3270e50-c3d4-4773-b4e1-40d94f134235/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;首先这并不是一篇翻译文章，是看了原文之后我对这个漏洞的一点分析和理解。&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://security.infoteam.ch/en/blog/posts/narrative-of-an-incident-response-from-compromise-to-the-publication-of-the-weakness.html&#34;&gt;https://security.infoteam.ch/en/blog/posts/narrative-of-an-incident-response-from-compromise-to-the-publication-of-the-weakness.html&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;Interspire Email Marketer 是一款商业软件，在6.1.0之后的版本由于错误使用逻辑运算符和忽视弱类型特点产生了安全问题，并在6.1.6做了修复，但中间竟然相隔了5年之久，最坑的是好像更新版本还需要支付额外的费用～&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CVE-2017-15944 Palo Alto防火墙远程代码执行构造 EXP</title>
+      <link>http://localhost:1313/posts/09538882-9eac-471e-a22e-002c9d627a18/</link>
+      <pubDate>Fri, 26 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/09538882-9eac-471e-a22e-002c9d627a18/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;在 exploit-db 看到 CVE-2017-15944 这个漏洞，三处漏洞打出的组合拳导致最后命令执行，三环缺一不可，最喜欢这样变废为宝的利用，但是在复现构造EXP还是遇到不少“坑”，本文记录一下填坑的过程&amp;hellip;.&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;exploit-db 地址 &lt;a href=&#34;https://www.exploit-db.com/exploits/43342/&#34;&gt;https://www.exploit-db.com/exploits/43342/&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;该漏洞影响范围还是很广泛的，但是并没有看到有人放出EXP，最多只是PoC或者省去了很坑的命令执行漏洞。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>vscode extension 钓鱼</title>
+      <link>http://localhost:1313/posts/d5b71c9b-aa49-460c-8b7e-9aa350df0c89/</link>
+      <pubDate>Wed, 17 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/d5b71c9b-aa49-460c-8b7e-9aa350df0c89/</guid>
+      <description>&lt;p&gt;灵感来源于fate0这篇 &lt;a href=&#34;http://blog.fatezero.org/2017/06/01/package-fishing/?from=groupmessage&amp;amp;isappinstalled=0&#34;&gt;Package 钓鱼&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;随想做一次针对开发者的“钓鱼”实验，编程语言模块库的钓鱼实验fate0和ztz已经做过了，所以这次把实验对象选择编辑器(IDE)&lt;/p&gt;&#xA;&lt;p&gt;$5买了一台廉价vps用作收集用户数据，收集以下信息。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CVE-2017-17405 Ruby Command injection</title>
+      <link>http://localhost:1313/posts/d90669d3-a497-40cd-b73a-7e02bcc49cf5/</link>
+      <pubDate>Sat, 16 Dec 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/d90669d3-a497-40cd-b73a-7e02bcc49cf5/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;Ruby 是一种面向对象、命令式、函数式、动态的通用编程语言。在20世纪90年代中期由日本计算机科学家松本行弘（Matz）设计并开发。 -  &lt;a href=&#34;https://zh.wikipedia.org/wiki/Ruby&#34;&gt;Ruby - 维基百科，自由的百科全书&lt;/a&gt;&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;编程语言里出现rce漏洞真的太少见了，CVE-2017-17405 是Ruby中Net::FTP 使用open() 并且localfile可控所导致的rce&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>幕布(mubu.com) Client 远程命令执行</title>
+      <link>http://localhost:1313/posts/e0642d46-a4f6-48b3-99ed-dc72372d0873/</link>
+      <pubDate>Sat, 16 Dec 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/e0642d46-a4f6-48b3-99ed-dc72372d0873/</guid>
+      <description>&lt;p&gt;uodate&lt;/p&gt;&#xA;&lt;p&gt;一位安全研究员对幕布客户端的最新研究&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://xz.aliyun.com/t/4910&#34;&gt;https://xz.aliyun.com/t/4910&lt;/a&gt;&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;幕布(mubu.com)是一款头脑管理工具，用更高效的方式和清晰的结构来记录笔记、管理任务、制定工作计划、头脑风暴。用最好的方式释放您的大脑！&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;幕布使用 Electron 框架开发，想要验证这一点很容易，在 /Applications/幕布.app/Contents/ 可以可以发现一些 Electron 框架的信息&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>命令注入一些利用技巧</title>
+      <link>http://localhost:1313/posts/f886a750-a9d6-4f4b-917c-3110380276c7/</link>
+      <pubDate>Wed, 05 Jul 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/f886a750-a9d6-4f4b-917c-3110380276c7/</guid>
+      <description>&lt;h4 id=&#34;前言&#34;&gt;前言&lt;/h4&gt;&#xA;&lt;p&gt;如果在做渗透的时候如果能发现一处命令注入，肯定会特别开心，这个时候就离进内网不远了，但往往会遇到各种限制，本文记录一些利用技巧。&lt;/p&gt;&#xA;&lt;p&gt;首先要先区分命令注入和代码执行的区别，这是两种不同的概念，很容易搞混。&lt;/p&gt;&#xA;&lt;p&gt;可以看这篇文章 &lt;a href=&#34;https://landgrey.me/judge-cmd_execute-or-code_execute/&#34;&gt;命令注入与代码执行的判断&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>我加入的那些小秘圈</title>
+      <link>http://localhost:1313/posts/348f15ab-236e-45b4-ad91-e367c5e14354/</link>
+      <pubDate>Wed, 05 Jul 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/348f15ab-236e-45b4-ad91-e367c5e14354/</guid>
+      <description>&lt;h4 id=&#34;代码审计&#34;&gt;代码审计&lt;/h4&gt;&#xA;&lt;p&gt;phith0n 的圈子，内容质量很高，p 牛还会不定期分享一些奇技淫巧，强烈推荐&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171651163.JPG&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h4 id=&#34;腾讯安全平台部&#34;&gt;腾讯安全平台部&lt;/h4&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171651298.JPG&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h4 id=&#34;ctfwpnu1l&#34;&gt;CTFWP@Nu1L&lt;/h4&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171651186.JPG&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h4 id=&#34;java安全研究&#34;&gt;JAVA安全研究&lt;/h4&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171652041.JPG&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h4 id=&#34;qz安全情报分析&#34;&gt;qz安全情报分析&lt;/h4&gt;&#xA;&lt;p&gt;（好长时间不更新了）&lt;/p&gt;&#xA;&lt;p&gt;茄子牛（RAY）建立的，茄牛内容更新很快，而且经常凌晨更新，一手安全情报资源，还会不定期分享一些红/蓝对抗的资料和知识，讨论的人也很多，绝对比关注一些安全媒体靠谱得多。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>mCTF2017 writeup</title>
+      <link>http://localhost:1313/posts/c8000cc7-1135-4d5f-80c1-3e5236ba57e5/</link>
+      <pubDate>Sat, 25 Mar 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/c8000cc7-1135-4d5f-80c1-3e5236ba57e5/</guid>
+      <description>&lt;h2 id=&#34;mctf2017--writeup&#34;&gt;mCTF2017  writeup&lt;/h2&gt;&#xA;&lt;p&gt;选手 writeup&lt;/p&gt;&#xA;&lt;p&gt;@__画船听雨  &lt;a href=&#34;https://pan.baidu.com/s/1sljPuzV&#34;&gt;https://pan.baidu.com/s/1sljPuzV&lt;/a&gt;&#xA;@王松_Striker  &lt;a href=&#34;http://pan.baidu.com/s/1miOBarA&#34;&gt;http://pan.baidu.com/s/1miOBarA&lt;/a&gt; 密码: gpga&#xA;@pcat  &lt;a href=&#34;http://pan.baidu.com/s/1i4S4CNb&#34;&gt;http://pan.baidu.com/s/1i4S4CNb&lt;/a&gt; 密码：gb1f&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;p&gt;大致是Web+Misc的出题方向思路，看了一些大佬发给的writeup，没有和预期的做题思路有太大偏差，其实题目也没涉及什么奇技淫巧，仔细看官方文档都能解决。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Pwnhub 公开赛 Web writeup</title>
+      <link>http://localhost:1313/posts/af427e51-faac-45a8-96df-b6d9790d0d61/</link>
+      <pubDate>Thu, 08 Dec 2016 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/af427e51-faac-45a8-96df-b6d9790d0d61/</guid>
+      <description>&lt;h2 id=&#34;前面&#34;&gt;前面&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;http://Pwnhub.cn&#34;&gt;Pwnhub.cn&lt;/a&gt; 是老司机们经常开车的地方，新司机想学开车就更得多多关注了(/捂脸逃)。&lt;/p&gt;&#xA;&lt;p&gt;戳这里关注官微：&lt;a href=&#34;http://weibo.com/6064280443&#34;&gt;胖哈勃&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;因为是内测，司机要取得&amp;quot;通行证&amp;quot;(邀请码)才能上路，那么作为公开赛，其实就是拿 Flag 换邀请码啦。&lt;/p&gt;&#xA;&lt;p&gt;两个方向，Web 和 binary，作为一只🐶，不要挣扎就选 Web 吧。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>模拟众测漏洞 writeup</title>
+      <link>http://localhost:1313/posts/160e0ef9-2d53-4342-894d-d2b756facd36/</link>
+      <pubDate>Sun, 23 Oct 2016 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/160e0ef9-2d53-4342-894d-d2b756facd36/</guid>
+      <description>&lt;h2 id=&#34;write-up&#34;&gt;write-up&lt;/h2&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171644273.jpg&#34; alt=&#34;&#34;&gt;&#xA;已经告诉 flag 位置，那么朝着这么目标渗透吧。&lt;/p&gt;&#xA;&lt;p&gt;一开始是一个后台登录界面，想要模拟的环境是后台对外开放并且可被注册，在众测中也经常遇到这类漏洞，比如员工系统或者协同办公系统，注册登录后在内部的 wiki 中发现一些敏感信息。&#xA;登录处有预留一个SQL注入，想考的是任意账号登录，所以在代码中限制了长度，SQLMAP 默认没有尝试&lt;strong&gt;or&lt;/strong&gt;注入，好像跑不出来，这个位置的注入还算隐秘，主要看渗透者细不细心，如果不细心怎么办？没关系呀~ 拿出打 CTF 的套路，页面中的一切都有可能是tips，就好像玩密室逃脱，慢慢找线索。 //唉，别打我&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Linux 下的命令注入</title>
+      <link>http://localhost:1313/posts/ed6611cf-81ce-4463-95ca-ed3e54bbbcbd/</link>
+      <pubDate>Tue, 20 Sep 2016 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/ed6611cf-81ce-4463-95ca-ed3e54bbbcbd/</guid>
+      <description>&lt;h2 id=&#34;linux-下的命令注入&#34;&gt;Linux 下的命令注入&lt;/h2&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;之前发在微博上的一道题，首先投稿到了三哥的公众号然后发在了微博上，建立了这个 Blog 之后搬运过来。&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;code&gt;目标是Linux系统的命令注入，要求必须用echo命令写Webshell，但不能出现e、c、h、o这四个字符，cat、tee、wget、curl、less、more 这些带有关键字的都不行&lt;/code&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>电影解读 ·《不能说的秘密》</title>
+      <link>http://localhost:1313/posts/b0825e8e-e876-48ab-88f7-a541e6edfced/</link>
+      <pubDate>Sun, 18 Sep 2016 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/b0825e8e-e876-48ab-88f7-a541e6edfced/</guid>
+      <description>&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/09/202402171618695.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h3 id=&#34;写在前面&#34;&gt;写在前面&lt;/h3&gt;&#xA;&lt;p&gt;《不能说的秘密》是周董自导自演的一部电影，也是我个人最喜欢的一部爱情类电影，有一天闲逛知乎，看到这篇回答，作者每个细节都分析得很透彻，很多地方都有产生共鸣，对剧情的解读尤为厉害，经过作者同意对文章进行细节上的修改并转载到 Blog 中。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

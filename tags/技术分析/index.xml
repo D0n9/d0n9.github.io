@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>技术分析 on # alert`D0n9` ｜ 输攻墨守</title>
+    <link>http://localhost:1313/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/</link>
+    <description>Recent content in 技术分析 on # alert`D0n9` ｜ 输攻墨守</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 12 Jan 2026 18:55:08 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CVE-2026-22777 ComfyUI Manager 从 Config CRLF Injection 到 RCE</title>
+      <link>http://localhost:1313/posts/563dbc2c-20be-43ba-9a5b-ea911ed5ed3d/</link>
+      <pubDate>Mon, 12 Jan 2026 18:55:08 +0800</pubDate>
+      <guid>http://localhost:1313/posts/563dbc2c-20be-43ba-9a5b-ea911ed5ed3d/</guid>
+      <description>&lt;p&gt;我在研究复现 CVE-2025-67303 ComfyUI-Manager RCE （ &amp;lt; 3.38） 时发现了 RCE 3.38 版本的办法(实际可利用范围 &amp;lt; 3.39.2, 4.0.0 - 4.0.4)，和 swing 一起研究确认这个属于 0day 漏洞， 考虑到 ComfyUI-Manager 已经默认集成在高版本 ComfyUI，所以这个漏洞也可以说是 ComfyUI 的问题&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://github.com/Comfy-Org/ComfyUI-Manager/security/advisories/GHSA-562r-8445-54r2&#34;&gt;https://github.com/Comfy-Org/ComfyUI-Manager/security/advisories/GHSA-562r-8445-54r2&lt;/a&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;comfyui-安全机制&#34;&gt;ComfyUI 安全机制&lt;/h1&gt;&#xA;&lt;p&gt;ComfyUI 其中一个重要的安全机制是：通过配置文件（config.ini）中的 security_level 参数进行控制，不同安全等级对应不同的功能限制和适用场景。主要分为这四个等级：strong、normal、normal-、weak，我们只需要弄明白 normal 和 weak 的区别即可。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CVE-2017-14322 登录认证绕过分析</title>
+      <link>http://localhost:1313/posts/c3270e50-c3d4-4773-b4e1-40d94f134235/</link>
+      <pubDate>Sat, 05 May 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/c3270e50-c3d4-4773-b4e1-40d94f134235/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;首先这并不是一篇翻译文章，是看了原文之后我对这个漏洞的一点分析和理解。&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://security.infoteam.ch/en/blog/posts/narrative-of-an-incident-response-from-compromise-to-the-publication-of-the-weakness.html&#34;&gt;https://security.infoteam.ch/en/blog/posts/narrative-of-an-incident-response-from-compromise-to-the-publication-of-the-weakness.html&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;Interspire Email Marketer 是一款商业软件，在6.1.0之后的版本由于错误使用逻辑运算符和忽视弱类型特点产生了安全问题，并在6.1.6做了修复，但中间竟然相隔了5年之久，最坑的是好像更新版本还需要支付额外的费用～&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

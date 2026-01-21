@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Pwnhub 公开赛 Web writeup &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>Pwnhub 公开赛 Web writeup</h1>
+    <div class="title-header-date">
+        <time>Thursday, December 8, 2016</time>
+    </div>
+    
+  </header>
+  <h2 id="前面">前面<aside class="heading-anchor"><a href="#前面" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h2>
+<p><a href="http://Pwnhub.cn">Pwnhub.cn</a> 是老司机们经常开车的地方，新司机想学开车就更得多多关注了(/捂脸逃)。</p>
+<p>戳这里关注官微：<a href="http://weibo.com/6064280443">胖哈勃</a></p>
+<p>因为是内测，司机要取得&quot;通行证&quot;(邀请码)才能上路，那么作为公开赛，其实就是拿 Flag 换邀请码啦。</p>
+<p>两个方向，Web 和 binary，作为一只🐶，不要挣扎就选 Web 吧。</p>
+<p>（了解到 Web 题是长亭 CSO 人称 V总的 Valo 在一次实战中遇到的， binary 题则是今年1024 GeekPwn 上破解 PS4 主力进攻选手所出）</p>
+<h2 id="过程">过程<aside class="heading-anchor"><a href="#过程" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h2>
+<p>线上比赛地址：<a href="http://54.223.145.113:88/">http://54.223.145.113:88/</a></p>
+<p>做题没截图，大家意会好了。</p>
+<p>看到是一个上传页面，难道要考上传拿 Shell ？诶？上传的文件内容会回显到页面中，会不会是 <strong>system(cat)</strong> 的，拼接一下命令，哦不是。可能是<strong>file_get_contents()</strong> 读取的，会不会有 SSRF，先看看可以控制的两个位置，文件名和文件内容，拼接一下文件名，后缀得是 <strong>txt 结尾</strong>，domain.com/1.txt绕过就好，但是 cloudeye 并没有反应。虽然文件内容会原样显示到页面，能造成 XSS 漏洞，但也只是 Self-XSS ，貌似没什么卵用。</p>
+<p>陷入僵局，那试一下会不会有源代码泄露啥的，毕竟也是 CTF 常见套路，<strong>.bak</strong>、<strong>.swp</strong>、<strong>.php~</strong>、<strong>.svn</strong>、<strong>.git</strong> 等都试了一遍无果，扫目录吧😭，啪啪啪，一通扫发现 <strong>/upload/</strong> 是HTTP 403，证明目录存在呀，也难怪，本身就是上传文件嘛，诶，目录如果403的话，那里面的文件不会也403吧，尝试访问一下**/1**，是 HTTP 404，那就知道了 Apache Directory 设置的是 <strong>var/www/html/upload</strong> 但知道这点也没有用呐，甚至还不知道 Flag 在哪。</p>
+<p>* 先放一放，接着搬砖</p>
+<p>然后晚上回家看到官微放出 <strong>hint</strong> ，还叫自行寻找，躲猫猫什么的最喜欢了😳，右键查看源代码，html注释中有 <strong>upload.php</strong> 关键代码。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;!--</span>
+</span></span><span class="line"><span class="cl"><span class="o">@</span><span class="nx">move_uploaded_file</span><span class="p">(</span><span class="nv">$_FILES</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">][</span><span class="s1">&#39;tmp_name&#39;</span><span class="p">],</span> <span class="nv">$dir</span><span class="o">.</span><span class="nv">$name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> <span class="s2">&#34;上传成功！</span><span class="se">\n\n</span><span class="s2">文件内容：</span><span class="se">\n\n</span><span class="s2">&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> <span class="nx">file_get_contents</span><span class="p">(</span><span class="nv">$dir</span><span class="o">.</span><span class="nv">$name</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nv">$files</span> <span class="o">=</span> <span class="nx">glob</span><span class="p">(</span><span class="nv">$dir</span> <span class="o">.</span> <span class="s1">&#39;*&#39;</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl"><span class="o">@</span><span class="nx">unlink</span><span class="p">(</span><span class="nv">$files</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl"><span class="o">--!&gt;</span>
+</span></span></code></pre></div><p>第一行移动上传的文件，第二行无视掉，第三行果然是使用file_get_contents，不过前面有加路径。</p>
+<p>关键是在第四行和第五行，glob 函数把 <strong>$dir</strong> 下的所有文件名匹配成数组赋值给 <strong>$files</strong> ,然后使用 unlink 删除掉排在最前面的那个文件。</p>
+<p>翻一下PHP手册 知道 glob 函数默认是会自动进行排序的，也就是说（话说 Linux 也会自动排序吧）</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/12/202402171711786.jpg" alt=""></p>
+<p>这样每次删除的就是排在最前面的文件，也就是说是可以删除不属于自己上传的文件的，但知道这个还是没继续的思路，既然是放出关键代码，问题肯定是出在这几行代码中的，可是 flag 在哪呢。</p>
+<p>然后看到官微又放 hint
+<code>Flag是个文件，不需要shell，并且听说放文件的人拥有服务器最高权限</code>
+soga，flag 是用 root 创建的，Apache 是 www-data 没权限对 flag 进行删除操作，那么如果 flag 就藏在upload 目录下，利用 glob 函数自动排序，学校老师就讲过文件排序方式。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">(0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz)
+</span></span><span class="line"><span class="cl"># ls
+</span></span><span class="line"><span class="cl"> 111 19882 abc2321312312 b12345 c1222 ctf.php
+</span></span></code></pre></div><p>可以逐步上传比 flag 文件名更名称靠后的文件，因为 <strong>unlink($files[0]);</strong> 删除排在第一位的文件，而且知道 flag 是 root 创建，Apache 删除不掉，比如一开始上传一个文件名为 S 没有被删除，那么就知道 S 排在了 flag 后面，进而知道 flag 开头是 R。
+脚本代码可以参考紫霞仙子在先知社区发的 <a href="https://xianzhi.aliyun.com/forum/read/516.html">https://xianzhi.aliyun.com/forum/read/516.html</a></p>
+<h2 id="最后">最后<aside class="heading-anchor"><a href="#最后" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h2>
+<p>这种 CTF 游戏很好呀，就像以前乌云做的三个白帽社区，在挑战中学习分享新姿势。放现在众多CTF 比赛中简直是一股清流。</p>
+<p>长亭牛逼</p>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/writeup">Writeup</a>
+    
+      <a href="/tags/ctf">CTF</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

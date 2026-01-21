@@ -1,0 +1,60 @@
+/* Posts Page Custom Styles */
+
+/* Year Header Styling */
+.archive-year {
+  margin-bottom: 2.5rem;
+}
+
+.archive-year-header {
+  font-size: 1.5rem; /* Reduced from 1.8rem to 1.5rem for better balance */
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid #eaeaea;
+  color: #444;
+}
+
+/* Override title-list for archive view to be cleaner */
+.archive-year .all-list {
+  margin-bottom: 0.8rem; /* Slightly tighter spacing */
+}
+
+.archive-year .title-list {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+/* On mobile, stack title and date */
+@media (max-width: 600px) {
+  .archive-year .title-list {
+    flex-direction: column;
+  }
+}
+
+.archive-year .title-list h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  flex: 1; /* Take up remaining space */
+  padding-right: 1rem;
+}
+
+.archive-year .title-list-date {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #888;
+  white-space: nowrap; /* Keep date on one line */
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .archive-year-header {
+    border-bottom-color: #333;
+    color: #ccc;
+  }
+  
+  .archive-year .title-list-date {
+    color: #999;
+  }
+}

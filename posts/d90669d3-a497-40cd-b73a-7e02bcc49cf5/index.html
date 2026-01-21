@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>CVE-2017-17405 Ruby Command injection &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>CVE-2017-17405 Ruby Command injection</h1>
+    <div class="title-header-date">
+        <time>Saturday, December 16, 2017</time>
+    </div>
+    
+  </header>
+  <blockquote>
+<p>Ruby 是一种面向对象、命令式、函数式、动态的通用编程语言。在20世纪90年代中期由日本计算机科学家松本行弘（Matz）设计并开发。 -  <a href="https://zh.wikipedia.org/wiki/Ruby">Ruby - 维基百科，自由的百科全书</a></p>
+</blockquote>
+<p>编程语言里出现rce漏洞真的太少见了，CVE-2017-17405 是Ruby中Net::FTP 使用open() 并且localfile可控所导致的rce</p>
+<p>Ruby 在 GitHub 中到项目在14号提交了fix <a href="https://github.com/ruby/ruby/commit/6d3f72e5be2312be312f2acbf3465b05293c1431">Fix a command injection vulnerability in Net::FTP. · ruby/ruby@6d3f72e</a>，可以看到几处原本使用open()现在改为了File.open()，之前没有接触过Ruby，奇怪为什么open()竟有执行命令的能力？</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/12/202402171657810.jpg" alt=""></p>
+<p>怀着这种问题打算找Ruby文档看看open()到底是什么鬼？然后我找到了这个 <a href="http://ruby-doc.org/core-2.3.0/Kernel.html#method-i-open">Module: Kernel (Ruby 2.3.0) </a></p>
+<p>详细介绍了CVE-2017-17405的成因，其实很简单，open()可以作为打开文件使用，但是，敲黑板! <strong>在文件名可控到时候则不安全，因为如果文件名以&rsquo;|&lsquo;开头时，其后的字符串会被当作命令来执行，而且文件名为&quot;|-&ldquo;的话，open将生成Ruby的子进程，并返回与子进程之间的管道(pipe)(IO对象)。(此时的运作与IO.popen相同。）</strong></p>
+<p>简直可怕，这个&quot;特性&quot;简直是Python程序员写Ruby时最最需要注意的地方之一呀。（perl也有这样的“特性”）</p>
+<p>本地试试&quot;威力&rdquo;</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/12/202402171657428.jpg" alt=""></p>
+<p>可能有人会说，&ldquo;这也是正常功能呀，官方文档也有提及，自己不仔细看文档怪谁&rdquo;</p>
+<p>的确，编程语言可以说时开发者不仔细看文档，开发者说文档内容太多大部分程序员都是当作字典用到到时候查一查，那总得有人为漏洞买单吧。</p>
+<p>lib/net/ftp.rb，官方也是使用了错误了函数，可见官方开发者也没有仔细看文档呀，233</p>
+<p>ref:
+<a href="https://www.ruby-lang.org/en/news/2017/12/14/net-ftp-command-injection-cve-2017-17405/">https://www.ruby-lang.org/en/news/2017/12/14/net-ftp-command-injection-cve-2017-17405/</a>
+<a href="http://ruby-doc.org/core-2.3.0/Kernel.html#method-i-open">http://ruby-doc.org/core-2.3.0/Kernel.html#method-i-open</a></p>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/cve">CVE</a>
+    
+      <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90">漏洞分析</a>
+    
+      <a href="/tags/rce">RCE</a>
+    
+      <a href="/tags/web%E5%AE%89%E5%85%A8">Web安全</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

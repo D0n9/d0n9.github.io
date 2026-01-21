@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>ImageMagick 漏洞凑热闹手札 &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>ImageMagick 漏洞凑热闹手札</h1>
+    <div class="title-header-date">
+        <time>Wednesday, August 22, 2018</time>
+    </div>
+    
+  </header>
+  <p>今天日常刷 twitter 看到 Tavis 点赞了这条推</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171659325.jpg" alt=""></p>
+<p>经历过2016年魔图漏洞洗礼的人看到 ImageMagick 就很敏感，fu*k 这是又报漏洞了，ImageMagick 运用很广泛，赶紧应急一波。</p>
+<p>不过比较坑的是就没有其他信息，受影响的主机受影响版本啥都没有，甚至组件官方也没有发布安全公告</p>
+<p>按照建议的临时解决方案（https://www.kb.cert.org/vuls/id/332928 ）针对装有ImageMagick的机器改一下 <strong>/etc/ImageMagick/policy.xml</strong> 配置文件，禁用以下编码器。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&lt;policy domain=&#34;coder&#34; rights=&#34;none&#34; pattern=&#34;PS&#34; /&gt;
+</span></span><span class="line"><span class="cl">&lt;policy domain=&#34;coder&#34; rights=&#34;none&#34; pattern=&#34;EPS&#34; /&gt;
+</span></span><span class="line"><span class="cl">&lt;policy domain=&#34;coder&#34; rights=&#34;none&#34; pattern=&#34;PDF&#34; /&gt;
+</span></span><span class="line"><span class="cl">&lt;policy domain=&#34;coder&#34; rights=&#34;none&#34; pattern=&#34;XPS&#34; /&gt;
+</span></span></code></pre></div><p>其实在2016年的爆ImageMagick RCE（CVE-2016-3714）的时候，当时官方的解决方案就是修改配置文件的方式（https://imagetragick.com/ ）p.s 虽然使用黑名单的方式不太符合漏洞修复原则..</p>
+<p>更改完配置文件后要怎样验证是否修复了呢？</p>
+<p>两种方法</p>
+<p>1、 找到各个网站的上传接口，把 poc 图片打一遍.. 反正是执行命令嘛，用 dnslog 或者反弹 SHELL 的 方式都可以
+2、 在主机上执行 convert poc.jpeg poc.gif</p>
+<p>但是这两种方式都不是最优</p>
+<p>因为短时间不可能找全所有的上传接口，而且打 poc 的方式存在一定的不稳定性，在不确定是否会对主机造成影响的情况下尽量不要尝试，当然如果是测试环境的话那就随便造了。</p>
+<p>执行convert 方式最简单的，排查起来也会更快速更准确，对主机影响也最小最可控，不过呢，有些主机安装的 ImageMagick-libs 可能不会有 convert 命令 （不确定）</p>
+<p>然后在我习惯性 less poc.jpeg （less 命令很好用）发现竟然也执行了。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171659909.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171659673.jpg" alt=""></p>
+<p>这就很有意思了。</p>
+<p>虽然知道这个漏洞是因为 Ghostscript 沙盒逃逸（https://cert.360.cn/warning/detail?id=154bd8345f9cd560ea1c0e5bf453a41d ）ImageMagick 只是众多受影响的软件之一，但是 less 也受影响就有些匪夷所思了..</p>
+<p>本着知其然知其所以然的态度，我决定找找原因，当然 c 我是审计不来的，逆向我也是不懂的 😭</p>
+<p>但是还可以用 strace 跟踪进程中的系统调用的方式一窥究竟</p>
+<p>注意，因为是用的 docker 的 centos 环境，所以启动时要加上 <strong>&ndash;security-opt seccomp:unconfined</strong></p>
+<p>然后就可以使用 strace 进行调试</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">strace -f -o /tmp/less-devul.txt less poc.jpeg
+</span></span></code></pre></div><p>调试日志是这样的，跟踪到的进程中的系统调用，包括 fork 调用所产生的子进程</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171659680.jpg" alt=""></p>
+<p>execve 就是执行的具体命令，然后我注意到这一条</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171700815.jpg" alt=""></p>
+<p>基本就确定就是这个原因</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171700610.jpg" alt=""></p>
+<p>这是个什么鬼脚本，看一下 less /usr/bin/lesspipe.sh</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="cp">#!/bin/sh
+</span></span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># To use this filter with less, define LESSOPEN:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># export LESSOPEN=&#34;|/usr/bin/lesspipe.sh %s&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c1">#</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># The script should return zero if the output was valid and non-zero</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># otherwise, so less could detect even a valid empty output</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># (for example while uncompressing gzipped empty file).</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># For backward-compatibility, this is not required by default. To turn</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># this functionality there should be another vertical bar (|) straight</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># after the first one in the LESSOPEN environment variable:</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># export LESSOPEN=&#34;||/usr/bin/lesspipe.sh %s&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># This function makes all return values 1 when 0 and otherwise 0</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Usually, app returns 0 when succeded and we need to return 1</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># This behavior is forced because backward compatiblity</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># (tcsh print_exit_value bug)</span>
+</span></span><span class="line"><span class="cl"><span class="k">function</span> handle_exit_status<span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="o">[</span> <span class="nv">$1</span> -eq <span class="m">0</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">exit</span> <span class="m">1</span>
+</span></span><span class="line"><span class="cl">  <span class="k">fi</span>
+</span></span><span class="line"><span class="cl">  <span class="nb">exit</span> <span class="m">0</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> ! -e <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">        handle_exit_status <span class="m">1</span> <span class="nv">$1</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="o">[</span> -d <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">        ls -alF -- <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">        handle_exit_status <span class="nv">$?</span>
+</span></span><span class="line"><span class="cl"><span class="k">fi</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nb">exec</span> 2&gt;/dev/null
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">case</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> in
+</span></span><span class="line"><span class="cl">*.<span class="o">[</span>1-9n<span class="o">]</span>.bz2<span class="p">|</span>*.<span class="o">[</span>1-9<span class="o">]</span>x.bz2<span class="p">|</span>*.man.bz2<span class="p">|</span>*.<span class="o">[</span>1-9n<span class="o">]</span>.<span class="o">[</span>gx<span class="o">]</span>z<span class="p">|</span>*.<span class="o">[</span>1-9<span class="o">]</span>x.<span class="o">[</span>gx<span class="o">]</span>z<span class="p">|</span>*.man.<span class="o">[</span>gx<span class="o">]</span>z<span class="p">|</span>*.<span class="o">[</span>1-9n<span class="o">]</span>.lzma<span class="p">|</span>*.<span class="o">[</span>1-9<span class="o">]</span>x.lzma<span class="p">|</span>*.man.lzma<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">case</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> in
+</span></span><span class="line"><span class="cl">        *.gz<span class="o">)</span>           <span class="nv">DECOMPRESSOR</span><span class="o">=</span><span class="s2">&#34;gzip -dc&#34;</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">        *.bz2<span class="o">)</span>          <span class="nv">DECOMPRESSOR</span><span class="o">=</span><span class="s2">&#34;bzip2 -dc&#34;</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">        *.xz<span class="p">|</span>*.lzma<span class="o">)</span>    <span class="nv">DECOMPRESSOR</span><span class="o">=</span><span class="s2">&#34;xz -dc&#34;</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">esac</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">[</span> -n <span class="s2">&#34;</span><span class="nv">$DECOMPRESSOR</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="nv">$DECOMPRESSOR</span> -- <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="p">|</span> file - <span class="p">|</span> grep -q troff<span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">                <span class="nv">$DECOMPRESSOR</span> -- <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="p">|</span> groff -Tascii -mandoc -
+</span></span><span class="line"><span class="cl">                handle_exit_status <span class="nv">$?</span>
+</span></span><span class="line"><span class="cl">        <span class="k">fi</span> <span class="p">;;&amp;</span>
+</span></span><span class="line"><span class="cl">*.<span class="o">[</span>1-9n<span class="o">]</span><span class="p">|</span>*.<span class="o">[</span>1-9<span class="o">]</span>x<span class="p">|</span>*.man<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> file <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="p">|</span> grep -q troff<span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">                groff -Tascii -mandoc <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="p">|</span> cat -s
+</span></span><span class="line"><span class="cl">                handle_exit_status <span class="nv">$?</span>
+</span></span><span class="line"><span class="cl">        <span class="k">fi</span> <span class="p">;;&amp;</span>
+</span></span><span class="line"><span class="cl">*.tar<span class="o">)</span> tar tvvf <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.tgz<span class="p">|</span>*.tar.gz<span class="p">|</span>*.tar.<span class="o">[</span>zZ<span class="o">])</span> tar tzvvf <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.tar.xz<span class="o">)</span> tar Jtvvf <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.xz<span class="p">|</span>*.lzma<span class="o">)</span> xz -dc -- <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.tar.bz2<span class="p">|</span>*.tbz2<span class="o">)</span> bzip2 -dc -- <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span> <span class="p">|</span> tar tvvf -<span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.<span class="o">[</span>zZ<span class="o">]</span><span class="p">|</span>*.gz<span class="o">)</span> gzip -dc -- <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.bz2<span class="o">)</span> bzip2 -dc -- <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.zip<span class="p">|</span>*.jar<span class="p">|</span>*.nbm<span class="o">)</span> zipinfo -- <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.rpm<span class="o">)</span> rpm -qpivl --changelog -- <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.cpi<span class="p">|</span>*.cpio<span class="o">)</span> cpio -itv &lt; <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="p">;</span> handle_exit_status <span class="nv">$?</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*.gif<span class="p">|</span>*.jpeg<span class="p">|</span>*.jpg<span class="p">|</span>*.pcd<span class="p">|</span>*.png<span class="p">|</span>*.tga<span class="p">|</span>*.tiff<span class="p">|</span>*.tif<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">[</span> -x /usr/bin/identify <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">                identify <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">                handle_exit_status <span class="nv">$?</span>
+</span></span><span class="line"><span class="cl">        <span class="k">elif</span> <span class="o">[</span> -x /usr/bin/gm <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">                gm identify <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">                handle_exit_status <span class="nv">$?</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span>
+</span></span><span class="line"><span class="cl">                <span class="nb">echo</span> <span class="s2">&#34;No identify available&#34;</span>
+</span></span><span class="line"><span class="cl">                <span class="nb">echo</span> <span class="s2">&#34;Install ImageMagick or GraphicsMagick to browse images&#34;</span>
+</span></span><span class="line"><span class="cl">                handle_exit_status <span class="m">1</span>
+</span></span><span class="line"><span class="cl">        <span class="k">fi</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">*<span class="o">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">[</span> -x /usr/bin/file -a -x /usr/bin/iconv -a -x /usr/bin/cut <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">                <span class="k">case</span> <span class="sb">`</span>file -b <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span><span class="sb">`</span> in
+</span></span><span class="line"><span class="cl">                *UTF-16*<span class="o">)</span> <span class="nv">conv</span><span class="o">=</span><span class="s1">&#39;UTF-16&#39;</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">                *UTF-32*<span class="o">)</span> <span class="nv">conv</span><span class="o">=</span><span class="s1">&#39;UTF-32&#39;</span> <span class="p">;;</span>
+</span></span><span class="line"><span class="cl">                <span class="k">esac</span>
+</span></span><span class="line"><span class="cl">                <span class="nv">env</span><span class="o">=</span><span class="sb">`</span><span class="nb">echo</span> <span class="nv">$LANG</span> <span class="p">|</span> cut -d. -f2<span class="sb">`</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="o">[</span> -n  <span class="s2">&#34;</span><span class="nv">$conv</span><span class="s2">&#34;</span> -a -n <span class="s2">&#34;</span><span class="nv">$env</span><span class="s2">&#34;</span> -a <span class="s2">&#34;</span><span class="nv">$conv</span><span class="s2">&#34;</span> !<span class="o">=</span> <span class="s2">&#34;</span><span class="nv">$env</span><span class="s2">&#34;</span> <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+</span></span><span class="line"><span class="cl">                        iconv -f <span class="nv">$conv</span> -t <span class="nv">$env</span> <span class="s2">&#34;</span><span class="nv">$1</span><span class="s2">&#34;</span>
+</span></span><span class="line"><span class="cl">                        handle_exit_status <span class="nv">$?</span>
+</span></span><span class="line"><span class="cl">                <span class="k">fi</span>
+</span></span><span class="line"><span class="cl">        <span class="k">fi</span>
+</span></span><span class="line"><span class="cl">        handle_exit_status <span class="m">1</span>
+</span></span><span class="line"><span class="cl"><span class="k">esac</span>
+</span></span></code></pre></div><p>Soga，调用了 ImageMagick 的 identify 命令，less 图片格式文件的话，会输出这张图的各项信息，也是用到的 ImageMagick 或者 GraphicsMagick 这两个库</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171700683.jpg" alt=""></p>
+<p>继续跟进也的确证实了这一点</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171701794.jpg" alt=""></p>
+<p>而且执行过程中也有去读 policy.xml，修改完配置文件后是立即生效的。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171701532.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171702811.jpg" alt=""></p>
+<p>所以说基础组件出问题影响的范围是十分广泛的。默认源搜一下就有这么多</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171702419.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171702978.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171702967.jpg" alt=""></p>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/%E9%9A%8F%E7%AC%94">随笔</a>
+    
+      <a href="/tags/web%E5%AE%89%E5%85%A8">Web安全</a>
+    
+      <a href="/tags/imagemagick">ImageMagick</a>
+    
+      <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90">漏洞分析</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

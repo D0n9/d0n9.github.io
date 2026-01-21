@@ -1,0 +1,316 @@
+/* Home Page Custom Styles */
+
+/* Intro Section Styling */
+.home-intro {
+  margin-bottom: 3.5rem;
+  padding: 2rem; /* Add padding around the content */
+  border-radius: 12px; /* Rounded corners */
+  background-color: #f8f9fa; /* Light, subtle gray background */
+  position: relative; /* Context for absolute positioning if needed */
+  transition: background-color 0.3s ease; /* Smooth transition for theme switch */
+}
+
+.intro-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.intro-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.intro-text {
+  flex: 1;
+  min-width: 0; /* Prevent flex overflow */
+}
+
+/* Flex container for Name + Social Icons */
+.intro-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.intro-name {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.social-links {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.social-icon-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.social-icon-link:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.social-icon {
+  width: 1.4rem;
+  height: 1.4rem;
+  object-fit: contain;
+}
+
+.intro-bio {
+  font-size: 1.1rem;
+  margin: 0 0 1rem 0;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.intro-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0; 
+  opacity: 0.9;
+}
+
+.intro-social {
+  margin-top: 1rem;
+}
+
+.intro-link {
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 0.2s;
+}
+.intro-link:hover {
+  border-bottom-color: currentColor;
+}
+
+/* Mobile Responsive for Intro */
+@media (max-width: 600px) {
+  .home-intro {
+    padding: 1.5rem; /* Slightly less padding on mobile */
+  }
+
+  .intro-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  
+  /* On mobile, stack name and icons vertically, center them */
+  .intro-top-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .intro-description {
+    text-align: left; /* Keep long text readable */
+  }
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.3rem; 
+  font-weight: 600;
+  color: inherit;
+}
+
+.view-all {
+  font-size: 0.9rem;
+  color: inherit;
+  opacity: 0.7;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.view-all:hover {
+  text-decoration: underline;
+  opacity: 1;
+  color: inherit;
+}
+
+/* Post List Styling */
+.posts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.post-card {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0.2rem;
+}
+
+.post-title {
+  margin: 0 0 0.3rem 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.post-title a {
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.post-meta {
+  font-size: 0.85rem;
+  opacity: 0.8; 
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.meta-separator {
+  margin: 0 0.5rem;
+  font-weight: bold;
+}
+
+.tag-text {
+  margin-right: 0.5rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  background-color: rgba(25, 25, 25, 0.05);
+  color: inherit;
+}
+
+/* Tags Cloud Styling */
+.home-tags {
+  margin-top: 3rem;
+}
+.home-tags h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.tags-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.tag-chip {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  background-color: rgba(25, 25, 25, 0.05);
+}
+
+.tag-chip:hover {
+  text-decoration: underline;
+}
+
+.tag-chip .count {
+  font-size: 0.75em;
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  /* No special class for dark mode in this theme, it uses media query OR a JS switcher that might not toggle a class on body.
+     However, the JS switcher changes the href of the CSS link tag.
+     The problem is that our home.css is loaded AFTER the theme css, but we are using media queries here.
+     If the user manually switches to dark mode using the JS button, it loads 'dark.css'.
+     If 'dark.css' doesn't set a class on body, we can't target it easily with CSS only if the OS is light mode but site is dark mode.
+     
+     Wait, the theme switcher JS (themes/no-js-hugo-theme/static/js/theme-switcher.js) SWAPS the stylesheet link.
+     It does NOT add a class to the body.
+     
+     This means our 'home.css' media query only works if the OS is in dark mode.
+     If the OS is light mode but the user toggles the site to dark mode, our media query won't fire, 
+     and the card background will remain light (#f8f9fa), while the text color (inherited from body in dark.css) becomes light gray.
+     Light text on light background = unreadable.
+     
+     Solution: We should not set a fixed background color for the card in light mode if we can't reliably detect the JS toggle.
+     OR, we should make the card transparent by default and only add background if we are sure.
+     
+     BETTER SOLUTION: Use a background color that works for both OR is transparent.
+     Given the theme structure, let's make the card background transparent or semi-transparent 
+     and use a border instead to define the area, which is safer.
+     
+     Alternatively, since we can't easily hook into the JS switcher from CSS without modifying the JS or template significantly,
+     let's stick to a design that works with the variable text color.
+     
+     Let's use a background color that is derived from the main background but slightly different? 
+     No, we can't derive without CSS variables.
+     
+     Let's try a transparent background with a border for the card. It's safer.
+  */
+  
+  .home-intro {
+    background-color: transparent; /* Reset to transparent to be safe */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Light border for light mode */
+  }
+}
+
+/* Re-apply light mode specific styles via a strategy that works with the existing CSS architecture.
+   Actually, the theme's dark.css sets body background to rgb(27, 27, 27).
+   Light.css sets it to rgb(247, 247, 247).
+   
+   If we use `background-color: rgba(0, 0, 0, 0.03);` for the card, it will be slightly darker than background in light mode,
+   and slightly lighter (effectively) or just weird in dark mode? No, black with 0.03 opacity on dark grey is just slightly darker grey.
+   
+   Let's try using `rgba(127, 127, 127, 0.1)` - this is a white/black agnostic overlay.
+   On white bg: becomes light grey.
+   On dark bg: becomes lighter grey.
+   
+   Let's update .home-intro to use this adaptive background approach.
+*/
+
+.home-intro {
+  margin-bottom: 3.5rem;
+  padding: 2rem;
+  border-radius: 12px;
+  /* Use a semi-transparent background that works on both light and dark backgrounds to distinguish the card */
+  background-color: rgba(127, 127, 127, 0.05); 
+  border: 1px solid rgba(127, 127, 127, 0.1); /* Subtle border for definition */
+  position: relative;
+}
+
+/* Adjust dark mode specific overrides if the OS preference matches */
+@media (prefers-color-scheme: dark) {
+  .home-intro {
+    background-color: rgba(255, 255, 255, 0.05); /* Slightly lighten the background in dark mode */
+    border-color: rgba(255, 255, 255, 0.1);
+    border-bottom: none;
+  }
+
+  .section-header {
+    border-bottom-color: #333;
+  }
+  
+  .tag-text, .tag-chip {
+    background-color: rgba(90, 90, 90, 0.25);
+  }
+}

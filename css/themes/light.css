@@ -1,0 +1,235 @@
+@import url("light-chroma.css");
+
+/* CSS Variables for Theming */
+:root {
+    --bg-color: rgb(247, 247, 247);
+    --main-bg: white;
+    --text-color: #232629;
+    --link-color: #0000A0;
+    --border-color: #E0E0E0;
+    --code-bg: rgba(25, 25, 25, 0.05);
+    --header-bg-img: url(../../images/header-bg-light.jpg);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: rgb(27, 27, 27);
+        --main-bg: rgb(14, 14, 14);
+        --text-color: rgb(210, 210, 210);
+        --link-color: #A1A1EA;
+        --border-color: #505050;
+        --code-bg: rgba(90, 90, 90, 0.25);
+        --header-bg-img: url(../../images/header-bg-dark.jpg);
+    }
+}
+
+a {
+	color: var(--link-color);
+}
+
+.highlight > * {
+	border-color: var(--border-color);
+}
+
+:not(pre) > code {
+	/* inline code elements */
+	background-color: var(--code-bg);
+}
+
+a > code {
+	background-color: rgba(15, 15, 150, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+    a > code {
+        background-color: rgba(65, 65, 170, 0.3);
+    }
+}
+
+.section-list li > * {
+	background-color: var(--code-bg);
+}
+
+.section-list li > a {
+	background-color: rgba(15, 15, 150, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+    .section-list li > a {
+        background-color: rgba(65, 65, 170, 0.3);
+    }
+}
+
+body {
+	color: var(--text-color);
+	background-color: var(--bg-color);
+}
+
+blockquote {
+	color: #404040;
+	border-left: 0.25em solid #CCC;
+}
+
+@media (prefers-color-scheme: dark) {
+    blockquote {
+        color: rgb(170, 170, 170);
+        border-left: 0.25em solid #444;
+    }
+}
+
+hr {
+	border: 1px solid rgb(185, 185, 185);
+}
+
+@media (prefers-color-scheme: dark) {
+    hr {
+        border: 1px solid rgb(110, 110, 110);
+    }
+}
+
+.header {
+	background-image: var(--header-bg-img);
+}
+
+/* Fallback background color if image fails */
+@media (prefers-color-scheme: dark) {
+    .header {
+        background-color: rgb(40, 40, 40);
+    }
+}
+
+.links, .links li {
+	border-color: rgb(211, 211, 211);
+}
+
+@media (prefers-color-scheme: dark) {
+    .links, .links li {
+        border-color: #383838;
+    }
+}
+
+.main {
+	background-color: var(--main-bg);
+}
+
+.footer {
+	color: #383838;
+}
+
+@media (prefers-color-scheme: dark) {
+    .footer {
+        color: rgb(160, 160, 160);
+    }
+}
+
+.table-of-contents {
+	border-color: var(--border-color);
+	background-color: #FAFAFA;
+}
+
+@media (prefers-color-scheme: dark) {
+    .table-of-contents {
+        background-color: #1A1A1A;
+    }
+}
+
+/* Image Inversion for Dark Mode */
+@media (prefers-color-scheme: dark) {
+    img.color-adapting-image,
+    figure.color-adapting-image img {
+        filter: invert(85%) hue-rotate(180deg);
+    }
+}
+
+/* Notice Styles */
+.notice {
+	color: #404040;
+}
+
+@media (prefers-color-scheme: dark) {
+    .notice {
+        border-width: 2px;
+        border-style: solid;
+        border-top: 0;
+    }
+}
+
+.notice .notice-title {
+	color: white;
+}
+
+.notice .notice-title .notice-title-icon {
+	filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+    .notice .notice-title .notice-title-icon {
+        filter: invert(80%);
+    }
+}
+
+/* Note */
+.notice.note {
+	background-color: #E7F2FA;
+}
+@media (prefers-color-scheme: dark) {
+    .notice.note {
+        background-color: #001320;
+        border-color: #00487B;
+    }
+}
+
+.notice.note .notice-title {
+	background-color: #6AB0DE;
+}
+@media (prefers-color-scheme: dark) {
+    .notice.note .notice-title {
+        background-color: #00487B;
+    }
+}
+
+/* Tip */
+.notice.tip {
+	background-color: #e6f9e6;
+}
+@media (prefers-color-scheme: dark) {
+    .notice.tip {
+        background-color: #132000;
+        border-color: #105600;
+    }
+}
+
+.notice.tip .notice-title {
+	background-color: #77c577;
+}
+@media (prefers-color-scheme: dark) {
+    .notice.tip .notice-title {
+        background-color: #105600;
+    }
+}
+
+/* Warning */
+.notice.warning {
+	background-color: #fae2e2;
+}
+@media (prefers-color-scheme: dark) {
+    .notice.warning {
+        background-color: #200000;
+        border-color: #700000;
+    }
+}
+
+.notice.warning .notice-title {
+	background-color: #df6f6c;
+}
+@media (prefers-color-scheme: dark) {
+    .notice.warning .notice-title {
+        background-color: #700000;
+    }
+}
+
+@media (prefers-color-scheme: dark) and (max-width: 400pt) {
+	.links {
+		background-color: rgb(23, 23, 23);
+	}
+}

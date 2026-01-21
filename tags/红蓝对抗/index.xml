@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>红蓝对抗 on # alert`D0n9` ｜ 输攻墨守</title>
+    <link>http://localhost:1313/tags/%E7%BA%A2%E8%93%9D%E5%AF%B9%E6%8A%97/</link>
+    <description>Recent content in 红蓝对抗 on # alert`D0n9` ｜ 输攻墨守</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 17 Jan 2018 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E7%BA%A2%E8%93%9D%E5%AF%B9%E6%8A%97/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>vscode extension 钓鱼</title>
+      <link>http://localhost:1313/posts/d5b71c9b-aa49-460c-8b7e-9aa350df0c89/</link>
+      <pubDate>Wed, 17 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/d5b71c9b-aa49-460c-8b7e-9aa350df0c89/</guid>
+      <description>&lt;p&gt;灵感来源于fate0这篇 &lt;a href=&#34;http://blog.fatezero.org/2017/06/01/package-fishing/?from=groupmessage&amp;amp;isappinstalled=0&#34;&gt;Package 钓鱼&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;随想做一次针对开发者的“钓鱼”实验，编程语言模块库的钓鱼实验fate0和ztz已经做过了，所以这次把实验对象选择编辑器(IDE)&lt;/p&gt;&#xA;&lt;p&gt;$5买了一台廉价vps用作收集用户数据，收集以下信息。&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

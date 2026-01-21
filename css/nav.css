@@ -1,0 +1,45 @@
+/* Custom styles for navigation menu */
+.links {
+    font-size: 100% !important; /* Reduced from theme default 120% */
+    font-weight: 500;
+}
+
+.links li {
+    margin-right: 1.5em !important;
+}
+
+.links a {
+    position: relative;
+    padding-bottom: 2px;
+}
+
+.links a:hover {
+    text-decoration: none !important;
+    color: #000;
+}
+
+/* Add a subtle underline effect on hover */
+.links a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: currentColor;
+    transform-origin: bottom right;
+    transition: transform 0.25s ease-out;
+}
+
+.links a:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .links a:hover {
+        color: #fff;
+    }
+}

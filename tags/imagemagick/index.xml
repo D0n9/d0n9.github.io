@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ImageMagick on # alert`D0n9` ｜ 输攻墨守</title>
+    <link>http://localhost:1313/tags/imagemagick/</link>
+    <description>Recent content in ImageMagick on # alert`D0n9` ｜ 输攻墨守</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 22 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/imagemagick/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>ImageMagick 漏洞凑热闹手札</title>
+      <link>http://localhost:1313/posts/151a91bd-622f-4041-bf82-419d72cbab52/</link>
+      <pubDate>Wed, 22 Aug 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/151a91bd-622f-4041-bf82-419d72cbab52/</guid>
+      <description>&lt;p&gt;今天日常刷 twitter 看到 Tavis 点赞了这条推&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171659325.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;经历过2016年魔图漏洞洗礼的人看到 ImageMagick 就很敏感，fu*k 这是又报漏洞了，ImageMagick 运用很广泛，赶紧应急一波。&lt;/p&gt;&#xA;&lt;p&gt;不过比较坑的是就没有其他信息，受影响的主机受影响版本啥都没有，甚至组件官方也没有发布安全公告&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

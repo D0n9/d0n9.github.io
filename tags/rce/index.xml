@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>RCE on # alert`D0n9` ｜ 输攻墨守</title>
+    <link>http://localhost:1313/tags/rce/</link>
+    <description>Recent content in RCE on # alert`D0n9` ｜ 输攻墨守</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 26 Jan 2018 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/rce/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CVE-2017-15944 Palo Alto防火墙远程代码执行构造 EXP</title>
+      <link>http://localhost:1313/posts/09538882-9eac-471e-a22e-002c9d627a18/</link>
+      <pubDate>Fri, 26 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/09538882-9eac-471e-a22e-002c9d627a18/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;在 exploit-db 看到 CVE-2017-15944 这个漏洞，三处漏洞打出的组合拳导致最后命令执行，三环缺一不可，最喜欢这样变废为宝的利用，但是在复现构造EXP还是遇到不少“坑”，本文记录一下填坑的过程&amp;hellip;.&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;exploit-db 地址 &lt;a href=&#34;https://www.exploit-db.com/exploits/43342/&#34;&gt;https://www.exploit-db.com/exploits/43342/&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;该漏洞影响范围还是很广泛的，但是并没有看到有人放出EXP，最多只是PoC或者省去了很坑的命令执行漏洞。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CVE-2017-17405 Ruby Command injection</title>
+      <link>http://localhost:1313/posts/d90669d3-a497-40cd-b73a-7e02bcc49cf5/</link>
+      <pubDate>Sat, 16 Dec 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/d90669d3-a497-40cd-b73a-7e02bcc49cf5/</guid>
+      <description>&lt;blockquote&gt;&#xA;&lt;p&gt;Ruby 是一种面向对象、命令式、函数式、动态的通用编程语言。在20世纪90年代中期由日本计算机科学家松本行弘（Matz）设计并开发。 -  &lt;a href=&#34;https://zh.wikipedia.org/wiki/Ruby&#34;&gt;Ruby - 维基百科，自由的百科全书&lt;/a&gt;&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;编程语言里出现rce漏洞真的太少见了，CVE-2017-17405 是Ruby中Net::FTP 使用open() 并且localfile可控所导致的rce&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>幕布(mubu.com) Client 远程命令执行</title>
+      <link>http://localhost:1313/posts/e0642d46-a4f6-48b3-99ed-dc72372d0873/</link>
+      <pubDate>Sat, 16 Dec 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/e0642d46-a4f6-48b3-99ed-dc72372d0873/</guid>
+      <description>&lt;p&gt;uodate&lt;/p&gt;&#xA;&lt;p&gt;一位安全研究员对幕布客户端的最新研究&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://xz.aliyun.com/t/4910&#34;&gt;https://xz.aliyun.com/t/4910&lt;/a&gt;&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;幕布(mubu.com)是一款头脑管理工具，用更高效的方式和清晰的结构来记录笔记、管理任务、制定工作计划、头脑风暴。用最好的方式释放您的大脑！&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;幕布使用 Electron 框架开发，想要验证这一点很容易，在 /Applications/幕布.app/Contents/ 可以可以发现一些 Electron 框架的信息&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>命令注入一些利用技巧</title>
+      <link>http://localhost:1313/posts/f886a750-a9d6-4f4b-917c-3110380276c7/</link>
+      <pubDate>Wed, 05 Jul 2017 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/f886a750-a9d6-4f4b-917c-3110380276c7/</guid>
+      <description>&lt;h4 id=&#34;前言&#34;&gt;前言&lt;/h4&gt;&#xA;&lt;p&gt;如果在做渗透的时候如果能发现一处命令注入，肯定会特别开心，这个时候就离进内网不远了，但往往会遇到各种限制，本文记录一些利用技巧。&lt;/p&gt;&#xA;&lt;p&gt;首先要先区分命令注入和代码执行的区别，这是两种不同的概念，很容易搞混。&lt;/p&gt;&#xA;&lt;p&gt;可以看这篇文章 &lt;a href=&#34;https://landgrey.me/judge-cmd_execute-or-code_execute/&#34;&gt;命令注入与代码执行的判断&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Linux 下的命令注入</title>
+      <link>http://localhost:1313/posts/ed6611cf-81ce-4463-95ca-ed3e54bbbcbd/</link>
+      <pubDate>Tue, 20 Sep 2016 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/ed6611cf-81ce-4463-95ca-ed3e54bbbcbd/</guid>
+      <description>&lt;h2 id=&#34;linux-下的命令注入&#34;&gt;Linux 下的命令注入&lt;/h2&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;之前发在微博上的一道题，首先投稿到了三哥的公众号然后发在了微博上，建立了这个 Blog 之后搬运过来。&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;code&gt;目标是Linux系统的命令注入，要求必须用echo命令写Webshell，但不能出现e、c、h、o这四个字符，cat、tee、wget、curl、less、more 这些带有关键字的都不行&lt;/code&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

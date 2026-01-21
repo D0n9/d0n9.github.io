@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>模拟众测漏洞 writeup &ndash; # alert`D0n9` ｜ 输攻墨守</title>
+	<link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/nav.css">
+    
+    
+    
+    
+    
+	<link rel="stylesheet" href="/css/themes/light.css">
+</head>
+<body>
+	<input class="show-hide-menu-input" style="display:none;" autocomplete="off" type="checkbox" id="toggle-1">
+	<label class="overlay" for="toggle-1"></label>
+	<div class="main">
+		<header class="header">
+			<div class="header-content">
+				<div class="title">
+					<a href="http://localhost:1313/"># alert`D0n9` ｜ 输攻墨守</a>
+				</div>
+				<div>
+					<div class="header-right">
+						<label id="show-hide-menu-label" class="clickable-header-label" for="toggle-1">
+							<img class="color-adapting-image" width="30" src="/images/hamburger.svg" alt="menu button">
+						</label>
+					</div>
+					<div class="dont-show">
+						<p>
+							Links:
+						</p>
+					</div>
+					<ul class="links">
+						<li><a href="/">Home</a></li>
+						<li><a href="/posts/">Posts</a></li>
+						<li><a href="/about-me/">About Me</a></li>
+						<li><a href="/tags/">Tags</a></li>
+					</ul>
+				</div>
+			</div>
+		</header>
+		<main class="body">
+			<div class="body-content">
+  <header class="title-header">
+    <h1>模拟众测漏洞 writeup</h1>
+    <div class="title-header-date">
+        <time>Sunday, October 23, 2016</time>
+    </div>
+    
+  </header>
+  <h2 id="write-up">write-up<aside class="heading-anchor"><a href="#write-up" aria-label="Anchor"><img src="/images/chain-link.svg" class="color-adapting-image" height="20"></a></aside></h2>
+<p><img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171644273.jpg" alt="">
+已经告诉 flag 位置，那么朝着这么目标渗透吧。</p>
+<p>一开始是一个后台登录界面，想要模拟的环境是后台对外开放并且可被注册，在众测中也经常遇到这类漏洞，比如员工系统或者协同办公系统，注册登录后在内部的 wiki 中发现一些敏感信息。
+登录处有预留一个SQL注入，想考的是任意账号登录，所以在代码中限制了长度，SQLMAP 默认没有尝试<strong>or</strong>注入，好像跑不出来，这个位置的注入还算隐秘，主要看渗透者细不细心，如果不细心怎么办？没关系呀~ 拿出打 CTF 的套路，页面中的一切都有可能是tips，就好像玩密室逃脱，慢慢找线索。 //唉，别打我</p>
+<p>一般隐藏提示的地方常见于 <strong>html</strong> 或者 <strong>http header</strong> 中，很少有人注意到图片吧，诶厉害了，顺便还能涉及到隐写术，越来越像 CTF 了啊喂。
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171644102.jpg" alt="">
+很明显这不是一张普通的萌妹子图片，binwalk 告诉我们这张图片经过 ps 处理之后又捆绑了一个<strong>charles201610201126.zip</strong>文件，
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171644543.jpg" alt="">
+压缩包中是 charles 的保存文件，修改后缀为<strong>har</strong>然后用 charles 打开，
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171645994.jpg" alt="">
+当然这里想考的是注册 admin 的姿势，代码是这样写的</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">if (strlen($user) &gt; 5) {
+</span></span><span class="line"><span class="cl">    echo &#34;&lt;p&gt;waring：注意帐号长度不超过5位&lt;/p&gt;&#34;;
+</span></span><span class="line"><span class="cl">} elseif ($user == &#39;admin&#39;) {
+</span></span><span class="line"><span class="cl">    exit(&#39;&lt;script&gt;alert(&#34;admin已被注册&#34;)&lt;/script&gt;&#39;);
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></div><p>之前在微博放出的 tips 有提到这点，代码和数据库差异性导致的问题，这类问题虽然比较少见，记得最早好像在道哥的《白帽子讲 Web 安全》中看到过，user 字段长度设定为5，但没有在代码中对传入的 user 值进行长度限制，以至于可以注册一个用户名为<strong>admin1</strong>的账号，写入数据库时由于长度限制会自动截断丢弃，这样实际上还是注册了<strong>admin</strong>
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171645800.jpg" alt=""></p>
+<p>然后接下来注册流程会向邮箱发送激活账号链接，需要 user 和 token 值对应才行，这里模拟的是众测中很常见的密码找回案例，
+token看似是一组没有规律的字符串，其实是伪随机，有经验的同学可能会尝试破解这串 md5 观察是基于什么加密的。
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171646051.jpg" alt="">
+很明显是time()函数的一次 md5，很容易就能预测任何时间的token 值，这里有个小知识，观察 POST 的时间一般向后几秒就是正确的 token，但要注意，time()函数获取的时间戳是会和本地时间相差八小时，因为从php5.1.0开始，php.ini里加入了date.timezone这个选项，默认情况下是关闭的，也就是显示的时间（无论用什么php命令）都是格林威治标准时间 和我们的时间（北京时间）差了正好8个小时。
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171646452.jpg" alt=""></p>
+<p>进入到 admin 管理员账号，看到只有一个上传图片的功能（懒，没有写其他功能），看到有上传，大家惯性思维都会先测有没有任意文件上传的漏洞，不过仔细看上传的文件会被重命名，这里代码是这样写的，这样除非有解析漏洞或者文件包含。这里也是最坑的地方，很多同学到这里就没了思路。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">function</span> <span class="n">upload</span><span class="p">(){</span>
+</span></span><span class="line"><span class="cl">    <span class="o">$</span><span class="n">file</span> <span class="o">=</span> <span class="o">$</span><span class="n">_FILES</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 没文件上传就退出</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">isset</span><span class="p">(</span><span class="o">$</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="n">elseif</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">substr</span><span class="p">(</span><span class="o">$</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;jpg&#39;</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span><span class="p">(</span><span class="s1">&#39;&lt;script&gt;alert(&#34;仅支持jpg&#34;)&lt;/script&gt;&#39;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 文件名不可预测性</span>
+</span></span><span class="line"><span class="cl">    <span class="o">$</span><span class="n">salt</span> <span class="o">=</span> <span class="s1">&#39;8gs@22m.sa(fsf6n&#34;7s&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">$</span><span class="n">name</span> <span class="o">=</span> <span class="n">md5</span><span class="p">(</span><span class="n">md5</span><span class="p">(</span><span class="o">$</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">.</span> <span class="o">$</span><span class="n">salt</span><span class="p">)</span> <span class="o">.</span> <span class="o">$</span><span class="n">salt</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 判断是否是通过HTTP POST上传的</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">is_uploaded_file</span><span class="p">(</span><span class="o">$</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;tmp_name&#39;</span><span class="p">]))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 上传文件的存放路径</span>
+</span></span><span class="line"><span class="cl">    <span class="o">$</span><span class="n">upload_path</span> <span class="o">=</span> <span class="s2">&#34;./img/&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 移动文件到相应的文件夹</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">move_uploaded_file</span><span class="p">(</span><span class="o">$</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;tmp_name&#39;</span><span class="p">],</span> <span class="o">$</span><span class="n">upload_path</span> <span class="o">.</span> <span class="o">$</span><span class="n">name</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">echo</span> <span class="s2">&#34;&lt;img src=&#39;./img/$name&#39;&gt;&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">echo</span> <span class="s2">&#34;&lt;a href=&#39;del.php?del={$name}&#39;&gt;删除此图片&lt;/a&gt;&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">echo</span> <span class="o">$</span><span class="n">name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">exit</span><span class="p">(</span><span class="s2">&#34;Failed!&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>这里想模拟的是发生在众测中的一次真实的&quot;事故&quot;，某位白帽子意外删除了整个图片文件夹，不过并不是白帽子的锅，真的是开发太蠢，猜测可能是这样写的。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">function del($img_name){
+</span></span><span class="line"><span class="cl">    shell_exec(rm -rf . $img_name);
+</span></span><span class="line"><span class="cl">}
+</span></span></code></pre></div><p>大概 url 是这样的 <strong>xxx.com/userid/username/img/2016/01/01/imgname.jpg</strong> 白帽子测试把imgname.jpg去掉，可能是想看是否有文件遍历等问题，然后就 gg 了。不过最后协助厂商通过技术手段还是把文件找回来了。</p>
+<p>这么经典的&quot;事件&quot;，必须要拿出来分享一下。我这里没有敢用<strong>rm -rf</strong> 只把环境模拟出来，因为是linux 的命令注入，命令注入太危险，也从代码中过滤了很多可以用来 Bypass 的关键字符，留出来 <strong>;</strong> 用作拼接，同时做了命令白名单和长度，这就很蛋疼，不过会echo出经过过滤后的字符。
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171646570.jpg" alt="">
+那么我们知道 flag 是在当前用户目录下，直接去读取肯定是不行的了，因为这里不能回显而且还会把 <strong>. * /</strong> 这样的字符过滤掉，那要怎样才能获取到这个 flag 文件呢？可以用 <strong>tar</strong> 打包当前用户目录下的文件可以用 <strong>~</strong>
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171647937.jpg" alt="">
+然后会给出提交 flag 的地址
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171647812.jpg" alt="">
+不过直接访问的话会403
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171647608.jpg" alt="">
+这里想要模拟的是众测中遇到的一次绕云 Waf 的实例，主机开放了** http proxy **其实之前乌云主站也有过这样的漏洞案例，对外开放的代理带来的一系列安全问题，开启了通向内网的隧道，如果是 Socks 代理可玩的就更多了。
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171648586.jpg" alt="">
+设置代理，访问 <code>http://127.0.0.1/flag/flag.php</code>
+<img src="https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171648504.jpg" alt=""></p>
+
+  
+  
+  <div class="post-tags">
+    <p>Tags: 
+    
+      <a href="/tags/writeup">Writeup</a>
+    
+      <a href="/tags/ctf">CTF</a>
+    
+      <a href="/tags/web%E5%AE%89%E5%85%A8">Web安全</a>
+    
+    </p>
+  </div>
+  
+
+			</div>
+		</main>
+	</div>
+	<hr class="dont-show">
+	<footer class="footer">
+		<p>Powered by <a href="https://gohugo.io/">Hugo</a> &amp; <a href="https://github.com/stevenengler/no-js-hugo-theme">no-js-hugo-theme</a></p>
+	</footer>
+</body>
+</html>
