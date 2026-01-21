@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>随笔 on # alert`D0n9` ｜ 输攻墨守</title>
-    <link>http://localhost:1313/tags/%E9%9A%8F%E7%AC%94/</link>
+    <link>https://d0n9.github.io/tags/%E9%9A%8F%E7%AC%94/</link>
     <description>Recent content in 随笔 on # alert`D0n9` ｜ 输攻墨守</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
     <lastBuildDate>Wed, 22 Aug 2018 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/%E9%9A%8F%E7%AC%94/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://d0n9.github.io/tags/%E9%9A%8F%E7%AC%94/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>ImageMagick 漏洞凑热闹手札</title>
-      <link>http://localhost:1313/posts/151a91bd-622f-4041-bf82-419d72cbab52/</link>
+      <link>https://d0n9.github.io/posts/151a91bd-622f-4041-bf82-419d72cbab52/</link>
       <pubDate>Wed, 22 Aug 2018 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/151a91bd-622f-4041-bf82-419d72cbab52/</guid>
+      <guid>https://d0n9.github.io/posts/151a91bd-622f-4041-bf82-419d72cbab52/</guid>
       <description>&lt;p&gt;今天日常刷 twitter 看到 Tavis 点赞了这条推&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2018/08/202402171659325.jpg&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;经历过2016年魔图漏洞洗礼的人看到 ImageMagick 就很敏感，fu*k 这是又报漏洞了，ImageMagick 运用很广泛，赶紧应急一波。&lt;/p&gt;&#xA;&lt;p&gt;不过比较坑的是就没有其他信息，受影响的主机受影响版本啥都没有，甚至组件官方也没有发布安全公告&lt;/p&gt;</description>
     </item>
     <item>
       <title>[摘文]·徐阶觉醒 知行合一</title>
-      <link>http://localhost:1313/posts/7b245f8a-a7af-4b41-9d35-afa137303fa7/</link>
+      <link>https://d0n9.github.io/posts/7b245f8a-a7af-4b41-9d35-afa137303fa7/</link>
       <pubDate>Sat, 30 Jun 2018 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/7b245f8a-a7af-4b41-9d35-afa137303fa7/</guid>
+      <guid>https://d0n9.github.io/posts/7b245f8a-a7af-4b41-9d35-afa137303fa7/</guid>
       <description>&lt;h3 id=&#34;摘自-明朝那些事儿第七章-徐阶的觉醒&#34;&gt;摘自 《明朝那些事儿》第七章 徐阶的觉醒&lt;/h3&gt;&#xA;&lt;hr&gt;&#xA;&lt;p&gt;事情是这样的，延平一带虽然穷，却还有个天然优势——产矿。&lt;/p&gt;&#xA;&lt;p&gt;这矿出产的东西也比较特别——银。&lt;/p&gt;&#xA;&lt;p&gt;当年那个时候，银矿的地位大致相当于今天的印钞厂，只要能挖出来，就能用出去，还不用担心通货膨胀问题。&lt;/p&gt;</description>
     </item>
     <item>
       <title>我加入的那些小秘圈</title>
-      <link>http://localhost:1313/posts/348f15ab-236e-45b4-ad91-e367c5e14354/</link>
+      <link>https://d0n9.github.io/posts/348f15ab-236e-45b4-ad91-e367c5e14354/</link>
       <pubDate>Wed, 05 Jul 2017 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/348f15ab-236e-45b4-ad91-e367c5e14354/</guid>
+      <guid>https://d0n9.github.io/posts/348f15ab-236e-45b4-ad91-e367c5e14354/</guid>
       <description>&lt;h4 id=&#34;代码审计&#34;&gt;代码审计&lt;/h4&gt;&#xA;&lt;p&gt;phith0n 的圈子，内容质量很高，p 牛还会不定期分享一些奇技淫巧，强烈推荐&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171651163.JPG&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h4 id=&#34;腾讯安全平台部&#34;&gt;腾讯安全平台部&lt;/h4&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171651298.JPG&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h4 id=&#34;ctfwpnu1l&#34;&gt;CTFWP@Nu1L&lt;/h4&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171651186.JPG&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h4 id=&#34;java安全研究&#34;&gt;JAVA安全研究&lt;/h4&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2017/07/202402171652041.JPG&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h4 id=&#34;qz安全情报分析&#34;&gt;qz安全情报分析&lt;/h4&gt;&#xA;&lt;p&gt;（好长时间不更新了）&lt;/p&gt;&#xA;&lt;p&gt;茄子牛（RAY）建立的，茄牛内容更新很快，而且经常凌晨更新，一手安全情报资源，还会不定期分享一些红/蓝对抗的资料和知识，讨论的人也很多，绝对比关注一些安全媒体靠谱得多。&lt;/p&gt;</description>
     </item>
   </channel>

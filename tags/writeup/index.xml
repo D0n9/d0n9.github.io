@@ -2,31 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Writeup on # alert`D0n9` ｜ 输攻墨守</title>
-    <link>http://localhost:1313/tags/writeup/</link>
+    <link>https://d0n9.github.io/tags/writeup/</link>
     <description>Recent content in Writeup on # alert`D0n9` ｜ 输攻墨守</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
     <lastBuildDate>Sat, 25 Mar 2017 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/writeup/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://d0n9.github.io/tags/writeup/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>mCTF2017 writeup</title>
-      <link>http://localhost:1313/posts/c8000cc7-1135-4d5f-80c1-3e5236ba57e5/</link>
+      <link>https://d0n9.github.io/posts/c8000cc7-1135-4d5f-80c1-3e5236ba57e5/</link>
       <pubDate>Sat, 25 Mar 2017 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/c8000cc7-1135-4d5f-80c1-3e5236ba57e5/</guid>
+      <guid>https://d0n9.github.io/posts/c8000cc7-1135-4d5f-80c1-3e5236ba57e5/</guid>
       <description>&lt;h2 id=&#34;mctf2017--writeup&#34;&gt;mCTF2017  writeup&lt;/h2&gt;&#xA;&lt;p&gt;选手 writeup&lt;/p&gt;&#xA;&lt;p&gt;@__画船听雨  &lt;a href=&#34;https://pan.baidu.com/s/1sljPuzV&#34;&gt;https://pan.baidu.com/s/1sljPuzV&lt;/a&gt;&#xA;@王松_Striker  &lt;a href=&#34;http://pan.baidu.com/s/1miOBarA&#34;&gt;http://pan.baidu.com/s/1miOBarA&lt;/a&gt; 密码: gpga&#xA;@pcat  &lt;a href=&#34;http://pan.baidu.com/s/1i4S4CNb&#34;&gt;http://pan.baidu.com/s/1i4S4CNb&lt;/a&gt; 密码：gb1f&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;p&gt;大致是Web+Misc的出题方向思路，看了一些大佬发给的writeup，没有和预期的做题思路有太大偏差，其实题目也没涉及什么奇技淫巧，仔细看官方文档都能解决。&lt;/p&gt;</description>
     </item>
     <item>
       <title>Pwnhub 公开赛 Web writeup</title>
-      <link>http://localhost:1313/posts/af427e51-faac-45a8-96df-b6d9790d0d61/</link>
+      <link>https://d0n9.github.io/posts/af427e51-faac-45a8-96df-b6d9790d0d61/</link>
       <pubDate>Thu, 08 Dec 2016 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/af427e51-faac-45a8-96df-b6d9790d0d61/</guid>
+      <guid>https://d0n9.github.io/posts/af427e51-faac-45a8-96df-b6d9790d0d61/</guid>
       <description>&lt;h2 id=&#34;前面&#34;&gt;前面&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;http://Pwnhub.cn&#34;&gt;Pwnhub.cn&lt;/a&gt; 是老司机们经常开车的地方，新司机想学开车就更得多多关注了(/捂脸逃)。&lt;/p&gt;&#xA;&lt;p&gt;戳这里关注官微：&lt;a href=&#34;http://weibo.com/6064280443&#34;&gt;胖哈勃&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;因为是内测，司机要取得&amp;quot;通行证&amp;quot;(邀请码)才能上路，那么作为公开赛，其实就是拿 Flag 换邀请码啦。&lt;/p&gt;&#xA;&lt;p&gt;两个方向，Web 和 binary，作为一只🐶，不要挣扎就选 Web 吧。&lt;/p&gt;</description>
     </item>
     <item>
       <title>模拟众测漏洞 writeup</title>
-      <link>http://localhost:1313/posts/160e0ef9-2d53-4342-894d-d2b756facd36/</link>
+      <link>https://d0n9.github.io/posts/160e0ef9-2d53-4342-894d-d2b756facd36/</link>
       <pubDate>Sun, 23 Oct 2016 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/160e0ef9-2d53-4342-894d-d2b756facd36/</guid>
+      <guid>https://d0n9.github.io/posts/160e0ef9-2d53-4342-894d-d2b756facd36/</guid>
       <description>&lt;h2 id=&#34;write-up&#34;&gt;write-up&lt;/h2&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://raw.githubusercontent.com/D0n9/static-repo/main/images/2016/10/202402171644273.jpg&#34; alt=&#34;&#34;&gt;&#xA;已经告诉 flag 位置，那么朝着这么目标渗透吧。&lt;/p&gt;&#xA;&lt;p&gt;一开始是一个后台登录界面，想要模拟的环境是后台对外开放并且可被注册，在众测中也经常遇到这类漏洞，比如员工系统或者协同办公系统，注册登录后在内部的 wiki 中发现一些敏感信息。&#xA;登录处有预留一个SQL注入，想考的是任意账号登录，所以在代码中限制了长度，SQLMAP 默认没有尝试&lt;strong&gt;or&lt;/strong&gt;注入，好像跑不出来，这个位置的注入还算隐秘，主要看渗透者细不细心，如果不细心怎么办？没关系呀~ 拿出打 CTF 的套路，页面中的一切都有可能是tips，就好像玩密室逃脱，慢慢找线索。 //唉，别打我&lt;/p&gt;</description>
     </item>
   </channel>

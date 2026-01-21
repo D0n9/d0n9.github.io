@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>LFI on # alert`D0n9` ｜ 输攻墨守</title>
-    <link>http://localhost:1313/tags/lfi/</link>
+    <link>https://d0n9.github.io/tags/lfi/</link>
     <description>Recent content in LFI on # alert`D0n9` ｜ 输攻墨守</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
     <lastBuildDate>Fri, 21 Dec 2018 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/lfi/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://d0n9.github.io/tags/lfi/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>kibana console api LFI (CVE-2018-17246)</title>
-      <link>http://localhost:1313/posts/f0d085ab-f3ec-4ce9-894a-41a4d2202ae2/</link>
+      <link>https://d0n9.github.io/posts/f0d085ab-f3ec-4ce9-894a-41a4d2202ae2/</link>
       <pubDate>Fri, 21 Dec 2018 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/f0d085ab-f3ec-4ce9-894a-41a4d2202ae2/</guid>
+      <guid>https://d0n9.github.io/posts/f0d085ab-f3ec-4ce9-894a-41a4d2202ae2/</guid>
       <description>&lt;h2 id=&#34;背景&#34;&gt;背景&lt;/h2&gt;&#xA;&lt;p&gt;该漏洞由 CyberArk Labs 实验室 Nethanel Coppenhagen 发现 （https://www.cyberark.com/threat-research-blog/execute-this-i-know-you-have-it/），原文介绍该漏洞可能会导致远程代码执行，这是相当严重的问题，因为我们知道可以执行代码往往意味着也可以执行操作系统命令，既远程命令执行，不过深入了解后发现如果要达到远程命令执行其实十分困难，对目标环境有较为苛刻的要求。【且听我娓娓道来】&lt;/p&gt;</description>
     </item>
   </channel>

@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Command Injection on # alert`D0n9` ｜ 输攻墨守</title>
-    <link>http://localhost:1313/tags/command-injection/</link>
+    <link>https://d0n9.github.io/tags/command-injection/</link>
     <description>Recent content in Command Injection on # alert`D0n9` ｜ 输攻墨守</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
     <lastBuildDate>Tue, 20 Sep 2016 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/tags/command-injection/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://d0n9.github.io/tags/command-injection/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Linux 下的命令注入</title>
-      <link>http://localhost:1313/posts/ed6611cf-81ce-4463-95ca-ed3e54bbbcbd/</link>
+      <link>https://d0n9.github.io/posts/ed6611cf-81ce-4463-95ca-ed3e54bbbcbd/</link>
       <pubDate>Tue, 20 Sep 2016 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/posts/ed6611cf-81ce-4463-95ca-ed3e54bbbcbd/</guid>
+      <guid>https://d0n9.github.io/posts/ed6611cf-81ce-4463-95ca-ed3e54bbbcbd/</guid>
       <description>&lt;h2 id=&#34;linux-下的命令注入&#34;&gt;Linux 下的命令注入&lt;/h2&gt;&#xA;&lt;blockquote&gt;&#xA;&lt;p&gt;之前发在微博上的一道题，首先投稿到了三哥的公众号然后发在了微博上，建立了这个 Blog 之后搬运过来。&lt;/p&gt;&#xA;&lt;/blockquote&gt;&#xA;&lt;p&gt;&lt;code&gt;目标是Linux系统的命令注入，要求必须用echo命令写Webshell，但不能出现e、c、h、o这四个字符，cat、tee、wget、curl、less、more 这些带有关键字的都不行&lt;/code&gt;&lt;/p&gt;</description>
     </item>
   </channel>
